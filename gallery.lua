@@ -76,7 +76,7 @@ local function createNFTDisplay(nft, position, parent)
 local HttpService = game:GetService("HttpService")
 
 local function purchaseNFT(player, nft)
-    local url = "https://your-external-server.com/generate-payment"  -- Use your deployed server URL
+    local url = "https://your-server.com/generate-payment"  -- Reemplaza con tu servidor
     local requestData = {
         player = player.Name,
         nft = nft.name,
@@ -85,7 +85,6 @@ local function purchaseNFT(player, nft)
 
     local jsonRequest = HttpService:JSONEncode(requestData)
 
-    -- Safely make HTTP request
     local success, response = pcall(function()
         return HttpService:PostAsync(url, jsonRequest, Enum.HttpContentType.ApplicationJson)
     end)
@@ -93,14 +92,22 @@ local function purchaseNFT(player, nft)
     if success then
         local responseData = HttpService:JSONDecode(response)
         if responseData and responseData.payment_link then
-            player:SendNotification("Payment Required", "Click here to complete the purchase!", responseData.payment_link)
+            player:SendNotification("Pago Requerido", "Haz click para comprar el NFT", responseData.payment_link)
         else
-            player:SendNotification("Error", "Failed to generate payment link.")
+            player:SendNotification("Error", "No se pudo generar el pago.")
         end
     else
-        player:SendNotification("Error", "Could not connect to payment server.")
+        player:SendNotification("Error", "No se pudo conectar con el servidor.")
     end
 end
+
+local button = Instance.new("ClickDetector", frame)
+button.MaxActivationDistance = 10
+
+button.MouseClick:Connect(function(player)
+    purchaseNFT(player, nft)
+end)
+
 
 -- ClickDetector Setup
 local button = Instance.new("ClickDetector", frame)
