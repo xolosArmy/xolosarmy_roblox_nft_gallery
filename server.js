@@ -7,7 +7,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const CASH_TAB_URL = "https://cashtab.com/send";
-const RECEIVING_WALLET = "your-xec-wallet-address"; // Reemplaza con tu dirección eCash
+const RECEIVING_WALLET = "ecash:qqa4zjj0mt6gkm3uh6wcmxtzdr3p6f7cky4y7vujuw"; // Reemplaza con tu dirección eCash
 
 // API para generar un enlace de pago en Cashtab
 app.post("/generate-payment", (req, res) => {
