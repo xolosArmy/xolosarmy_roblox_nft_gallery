@@ -141,24 +141,36 @@ local npcAnim = game:GetService("RunService").Stepped:Connect(function()
 end)
 
 -- Leaderboard Display
-local leaderboardPart = createPart(Vector3.new(8, 6, 0.5), Vector3.new(20, 5, -gallerySize.Z / 2 + 1), Enum.Material.SmoothPlastic, Color3.fromRGB(50, 50, 50), true, 0, gallery)
+local HttpService = game:GetService("HttpService")
 
-local leaderboardGui = Instance.new("SurfaceGui", leaderboardPart)
-leaderboardGui.CanvasSize = Vector2.new(500, 500)
-local leaderboardText = Instance.new("TextLabel", leaderboardGui)
-leaderboardText.Size = UDim2.new(1, 0, 1, 0)
-leaderboardText.TextScaled = true
-leaderboardText.BackgroundTransparency = 1
-leaderboardText.TextColor3 = Color3.fromRGB(255, 255, 255)
+local function fetchNFTOwnership()
+    local url = "https://your-external-server.com/get-ownership" -- Replace with your backend
 
--- Update Leaderboard
-game:GetService("RunService").Stepped:Connect(function()
-    local leaderboardInfo = "NFT Owners:\n"
-    for player, nfts in pairs(nftOwners) do
-        leaderboardInfo = leaderboardInfo .. player .. ": " .. #nfts .. " NFTs\n"
+    local success, response = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+
+    if success then
+        local ownershipData = HttpService:JSONDecode(response)
+        return ownershipData
+    else
+        warn("Failed to fetch NFT ownership")
+        return nil
     end
-    leaderboardText.Text = leaderboardInfo
+end
+
+-- Update leaderboard display
+game:GetService("RunService").Stepped:Connect(function()
+    local ownershipData = fetchNFTOwnership()
+    if ownershipData then
+        local leaderboardInfo = "NFT Owners:\n"
+        for owner, nfts in pairs(ownershipData) do
+            leaderboardInfo = leaderboardInfo .. owner .. ": " .. #nfts .. " NFTs\n"
+        end
+        leaderboardText.Text = leaderboardInfo
+    end
 end)
+
 
 print("XolosArmy NFT Gallery with Leaderboard, NPC, and Animations Loaded!")
 
