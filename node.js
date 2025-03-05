@@ -3,7 +3,7 @@ const axios = require("axios");
 
 const CHRONIK_WS = "wss://chronik.be.cash/xec/ws"; // WebSocket for eCash blockchain
 const CHRONIK_API = "https://chronik.be.cash/xec"; // Chronik REST API
-const RECEIVING_WALLET = "your-xec-wallet-address"; // Replace with your actual wallet
+const RECEIVING_WALLET = "ecash:qqa4zjj0mt6gkm3uh6wcmxtzdr3p6f7cky4y7vujuw"; // Replace with your actual wallet
 
 const ws = new WebSocket(CHRONIK_WS);
 
