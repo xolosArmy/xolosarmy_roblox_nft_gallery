@@ -73,35 +73,43 @@ local function createNFTDisplay(nft, position, parent)
     -- Buy Button
     local HttpService = game:GetService("HttpService")
 
-local function purchaseNFT(player, nft)
-    local nftName = nft.name
-    local nftPrice = nft.price
-    local playerName = player.Name
+local HttpService = game:GetService("HttpService")
 
-    -- Send request to external server to generate Cashtab link
-    local url = "https://your-external-server.com/generate-payment"  -- Replace with your actual server URL
+local function purchaseNFT(player, nft)
+    local url = "https://your-external-server.com/generate-payment"  -- Use your deployed server URL
     local requestData = {
-        player = playerName,
-        nft = nftName,
-        price = nftPrice
+        player = player.Name,
+        nft = nft.name,
+        price = nft.price
     }
 
     local jsonRequest = HttpService:JSONEncode(requestData)
 
-    -- Make HTTP request
-    local response = HttpService:PostAsync(url, jsonRequest, Enum.HttpContentType.ApplicationJson)
+    -- Safely make HTTP request
+    local success, response = pcall(function()
+        return HttpService:PostAsync(url, jsonRequest, Enum.HttpContentType.ApplicationJson)
+    end)
 
-    -- Open the generated Cashtab link (Assumes your external server returns a payment link)
-    local responseData = HttpService:JSONDecode(response)
-    if responseData and responseData.payment_link then
-        player:SendNotification("Payment Required", "Click here to complete the purchase!", responseData.payment_link)
+    if success then
+        local responseData = HttpService:JSONDecode(response)
+        if responseData and responseData.payment_link then
+            player:SendNotification("Payment Required", "Click here to complete the purchase!", responseData.payment_link)
+        else
+            player:SendNotification("Error", "Failed to generate payment link.")
+        end
+    else
+        player:SendNotification("Error", "Could not connect to payment server.")
     end
 end
 
--- Modify existing ClickDetector event
+-- ClickDetector Setup
+local button = Instance.new("ClickDetector", frame)
+button.MaxActivationDistance = 10
+
 button.MouseClick:Connect(function(player)
     purchaseNFT(player, nft)
 end)
+
 
 
 -- Generate NFT displays
