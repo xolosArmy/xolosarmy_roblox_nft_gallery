@@ -71,17 +71,38 @@ local function createNFTDisplay(nft, position, parent)
     end)
 
     -- Buy Button
-    local button = Instance.new("ClickDetector", frame)
-    button.MaxActivationDistance = 10
+    local HttpService = game:GetService("HttpService")
 
-    button.MouseClick:Connect(function(player)
-        if not nftOwners[player.Name] then
-            nftOwners[player.Name] = {}
-        end
-        table.insert(nftOwners[player.Name], nft.name)
-        print(player.Name .. " bought " .. nft.name .. " for " .. nft.price .. " XEC!")
-    end)
+local function purchaseNFT(player, nft)
+    local nftName = nft.name
+    local nftPrice = nft.price
+    local playerName = player.Name
+
+    -- Send request to external server to generate Cashtab link
+    local url = "https://your-external-server.com/generate-payment"  -- Replace with your actual server URL
+    local requestData = {
+        player = playerName,
+        nft = nftName,
+        price = nftPrice
+    }
+
+    local jsonRequest = HttpService:JSONEncode(requestData)
+
+    -- Make HTTP request
+    local response = HttpService:PostAsync(url, jsonRequest, Enum.HttpContentType.ApplicationJson)
+
+    -- Open the generated Cashtab link (Assumes your external server returns a payment link)
+    local responseData = HttpService:JSONDecode(response)
+    if responseData and responseData.payment_link then
+        player:SendNotification("Payment Required", "Click here to complete the purchase!", responseData.payment_link)
+    end
 end
+
+-- Modify existing ClickDetector event
+button.MouseClick:Connect(function(player)
+    purchaseNFT(player, nft)
+end)
+
 
 -- Generate NFT displays
 for i, nft in pairs(nftData) do
