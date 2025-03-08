@@ -1,9 +1,15 @@
 const WebSocket = require("ws");
 const axios = require("axios");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const NFT = require("./models/NFT");
+
+dotenv.config();
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const CHRONIK_WS = "wss://chronik.be.cash/xec/ws"; 
 const CHRONIK_API = "https://chronik.be.cash/xec"; 
-const RECEIVING_WALLET = "ecash:qqa4zjj0mt6gkm3uh6wcmxtzdr3p6f7cky4y7vujuw"; 
+const RECEIVING_WALLET = "your-xec-wallet-address"; 
 
 const ws = new WebSocket(CHRONIK_WS);
 
@@ -36,17 +42,22 @@ async function checkConfirmations(txid) {
         if (txData.confirmations > 0) {
             console.log(`✅ Transacción ${txid} confirmada con ${txData.confirmations} bloques.`);
             
-            // Extraer el remitente (para asignar el NFT)
             const senderAddress = txData.inputs[0].outputScript;
 
-            // Actualizar propiedad del NFT
-            await updateNFTOwnership(senderAddress, txid);
+            // Guardar en BD
+            const nftPurchased = new NFT({
+                nftName: "NFT Comprado",
+                price: 100,  // Puedes mejorarlo con la data del NFT específico
+                owner: senderAddress,
+                txid: txid
+            });
+
+            await nftPurchased.save();
+            console.log(`✅ NFT guardado en la base de datos para ${senderAddress}`);
         } else {
             console.log(`⏳ Transacción ${txid} aún no confirmada.`);
         }
     } catch (error) {
         console.error("❌ Error obteniendo detalles de la transacción:", error);
     }
-}
-
 }
