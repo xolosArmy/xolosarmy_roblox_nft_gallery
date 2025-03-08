@@ -117,6 +117,23 @@ button.MouseClick:Connect(function(player)
     purchaseNFT(player, nft)
 end)
 
+    local function getUserNFTs(player)
+    local url = "https://your-server.com/nfts/" .. player.UserId
+
+    local success, response = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+
+    if success then
+        local nftData = HttpService:JSONDecode(response)
+        return nftData
+    else
+        warn("No se pudieron obtener los NFTs")
+        return nil
+    end
+end
+
+
 
 
 -- Generate NFT displays
