@@ -133,7 +133,6 @@ local function createNFTDisplay(nft, position, parent)
 	print("✅ NFT " .. nft.name .. " placed inside pyramid!")
 end
 
--- 📌 **Add NPC Guide Inside Pyramid**
 local function createNPC(position, parent)
 	local npc = Instance.new("Model", parent)
 	npc.Name = "GuideNPC"
@@ -152,8 +151,37 @@ local function createNPC(position, parent)
 	head.Material = Enum.Material.SmoothPlastic
 	head.Color = Color3.fromRGB(255, 200, 150)
 
-	print("✅ NPC Guide added inside Pyramid!")
+	-- Agregar un BillboardGui para mostrar instrucciones
+	local billboard = Instance.new("BillboardGui", head)
+	billboard.Size = UDim2.new(0, 200, 0, 50)
+	billboard.StudsOffset = Vector3.new(0, 3, 0)
+	billboard.Adornee = head
+	billboard.AlwaysOnTop = true
+
+	local textLabel = Instance.new("TextLabel", billboard)
+	textLabel.Size = UDim2.new(1, 0, 1, 0)
+	textLabel.BackgroundTransparency = 1
+	textLabel.Text = "¡Hola! Acércate a los NFTs para interactuar."
+	textLabel.TextScaled = true
+	textLabel.TextColor3 = Color3.new(1, 1, 1)
+	textLabel.Font = Enum.Font.SourceSansBold
+
+	-- Agregar un ProximityPrompt para interacción
+	local prompt = Instance.new("ProximityPrompt", head)
+	prompt.ActionText = "Leer instrucciones"
+	prompt.ObjectText = "Guía"
+	prompt.HoldDuration = 1
+	prompt.MaxActivationDistance = 10
+	prompt.PromptText = "Presiona para ver cómo interactuar con los NFTs"
+	prompt.Triggered:Connect(function(player)
+		print("El jugador " .. player.Name .. " ha solicitado instrucciones sobre los NFTs.")
+		-- Aquí puedes agregar lógica para abrir una GUI personalizada en el cliente,
+		-- por ejemplo, enviando un RemoteEvent para mostrar más información.
+	end)
+
+	print("✅ NPC Guide agregado dentro de la pirámide con instrucciones interactivas!")
 end
+
 
 -- **Run Script**
 local pyramid, interiorPosition = createPyramid(60, 30, Vector3.new(0, 0, 0), gallery)
