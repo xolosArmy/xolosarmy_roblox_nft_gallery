@@ -11,13 +11,15 @@ Lighting.OutdoorAmbient = Color3.fromRGB(255, 235, 180)
 
 -- 📌 **NFT Collection Data**
 local nftData = {
-	{name = "Xolo NFT 1", image = "rbxassetid://98634423862587", price = 100, description = "Primer NFT de la colección."},
-	{name = "Xolo NFT 2", image = "rbxassetid://138964163185737", price = 150, description = "Segundo NFT en exhibición."},
-	{name = "Xolo NFT 3", image = "rbxassetid://76765746423564", price = 200, description = "Tercer NFT exclusivo de XolosArmy."},
-	{name = "Xolo NFT 4", image = "rbxassetid://124867361088479", price = 250, description = "Cuarto NFT único de la colección."},
-	{name = "Xolo NFT 5", image = "rbxassetid://99482339753211", price = 300, description = "Quinto NFT con historia especial."},
-	{name = "Xolo NFT 6", image = "rbxassetid://72163034349412", price = 350, description = "NFT final en la galería de XolosArmy."}
-}
+	{name = "Eco de Mictlán", image = "rbxassetid://127060949306583", price = 1333333, description = "Envuelto en sombras violetas y azules lunares, este Xolo camina por senderos que los vivos no pueden ver. Su figura es bruma y memoria.
+Encarna la presencia del ausente, el susurro del más allá. No guía, espera. No brilla, pero refleja."},
+	{name = "Xolo de las Llamas", image = "rbxassetid://114618891546754", price = 1333333, description = "Una figura surgida del resplandor ancestral. Su silueta parece esculpida por energía y movimiento, como si danzara entre antiguas leyendas.
+Este Xolo representa la fuerza interior, la pasión profunda y el cambio necesario. Abre paso a lo esencial desde lo más íntimo."},
+	{name = "Vigilante del Amanecer", image = "rbxassetid://127951867096643", price = 1333333, description = "Envuelto en brillos cálidos, este Xoloitzcuintle contempla el horizonte desde el silencio sagrado. Su cuerpo irradia luz naciente: rojos y amarillos como lava solar.
+Representa el comienzo de una travesía, la primera respiración del alma que despierta. Es protector del nuevo día, guía del iniciado en el camino espiritual."},
+	{name = "Centinela del Crepúsculo", image = "rbxassetid://90112642641418", price = 1333333, description = "En la frontera donde el fuego toca la penumbra, se alza el Centinela del Crepúsculo. Este Xoloitzcuintle —con mirada dorada y piel marcada por los tonos del amanecer y el ocaso— representa la transición entre mundos.
+No es solo un guardián. Es un símbolo."}
+	}
 
 -- 📌 **Preload NFT Images**
 local function preloadNFTImages()
