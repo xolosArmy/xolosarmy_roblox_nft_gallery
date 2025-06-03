@@ -62,24 +62,39 @@ end)
 
 -- Links reales de Cashtab
 local nftLinks = {
-	["Eco de Mictlán"] = "https://cashtab.com/#/token/2fe71f60ddea05a11cab4dd33973376f109c83807691ae3c10380331df13c5d00",
-	["Xolo de las Llamas"] = "https://cashtab.com/#/token/93a0c38a7d60573ab41da34aa3f6dd83a2a49a95515b34ff1493e4dfdf7bf1d5",
-	["Vigilante del Amanecer"] = "https://cashtab.com/#/token/5121242b287d90b111635f4bc2e10914c4909b1a74701929e07d143203a49f50",
-	["Centinela del Crepúsculo"] = "https://cashtab.com/#/token/fe96165c2323d5421d598f3dd2f06f89961b7e63372fb29798fedf508c7d74d0",
+        ["Eco de Mictlán"] = "https://cashtab.com/#/token/2fe71f60ddea05a11cab4dd33973376f109c83807691ae3c10380331df13c5d00",
+        ["Xolo de las Llamas"] = "https://cashtab.com/#/token/93a0c38a7d60573ab41da34aa3f6dd83a2a49a95515b34ff1493e4dfdf7bf1d5",
+        ["Vigilante del Amanecer"] = "https://cashtab.com/#/token/5121242b287d90b111635f4bc2e10914c4909b1a74701929e07d143203a49f50",
+        ["Centinela del Crepúsculo"] = "https://cashtab.com/#/token/fe96165c2323d5421d598f3dd2f06f89961b7e63372fb29798fedf508c7d74d0",
 }
 
+local function showInfo(name, desc, link)
+        frame.NFTTitle.Text = name
+        frame.NFTDesc.Text = desc
+        if link then
+                button.Visible = true
+                button.Text = "Copiar enlace"
+                button.MouseButton1Click:Connect(function()
+                        setclipboard(link)
+                        button.Text = "¡Enlace copiado!"
+                        wait(1.2)
+                        button.Text = "Copiar enlace"
+                end)
+        else
+                button.Visible = false
+        end
+        frame.Visible = true
+end
+
 ReplicatedStorage:WaitForChild("ShowNFTInfo").OnClientEvent:Connect(function(name, desc)
-	frame.NFTTitle.Text = name
-	frame.NFTDesc.Text = desc
-	frame.Visible = true
-	local link = nftLinks[name]
-	button.MouseButton1Click:Connect(function()
-		if link then
-			setclipboard(link)
-			button.Text = "¡Enlace copiado!"
-			wait(1.2)
-			button.Text = "Copiar enlace de NFT"
-		end
-	end)
+        showInfo(name, desc, nftLinks[name])
+end)
+
+ReplicatedStorage:WaitForChild("ShowMuseumInfo").OnClientEvent:Connect(function(name, desc)
+        showInfo(name, desc, nil)
+end)
+
+ReplicatedStorage:WaitForChild("ShowKennelInfo").OnClientEvent:Connect(function(name, desc)
+        showInfo(name, desc, nil)
 end)
 
