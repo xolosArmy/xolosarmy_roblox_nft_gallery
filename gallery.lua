@@ -27,6 +27,141 @@ local function preloadNFTImages()
 	ContentProvider:PreloadAsync(assets)
 end
 
+local function createSpiritHall(startPosition, parent)
+        local hall = Instance.new("Model", parent)
+        hall.Name = "SalaDeLosEspiritus"
+
+        local corridorLength = 20
+        local corridor = Instance.new("Part", hall)
+        corridor.Size = Vector3.new(6, 1, corridorLength)
+        corridor.Position = startPosition + Vector3.new(0, 0.5, corridorLength / 2)
+        corridor.Anchored = true
+        corridor.Material = Enum.Material.Slate
+        corridor.Color = Color3.fromRGB(50, 50, 50)
+
+        local wallHeight = 8
+        local wallThickness = 1
+
+        local leftWall = Instance.new("Part", hall)
+        leftWall.Size = Vector3.new(wallThickness, wallHeight, corridorLength)
+        leftWall.Position = corridor.Position + Vector3.new(-(corridor.Size.X / 2 + wallThickness / 2), wallHeight / 2, 0)
+        leftWall.Anchored = true
+        leftWall.Material = Enum.Material.Slate
+        leftWall.Color = Color3.fromRGB(40, 40, 40)
+
+        local rightWall = leftWall:Clone()
+        rightWall.Position = corridor.Position + Vector3.new((corridor.Size.X / 2 + wallThickness / 2), wallHeight / 2, 0)
+        rightWall.Parent = hall
+
+        local roof = Instance.new("Part", hall)
+        roof.Size = Vector3.new(corridor.Size.X, 1, corridorLength)
+        roof.Position = corridor.Position + Vector3.new(0, wallHeight, 0)
+        roof.Anchored = true
+        roof.Material = Enum.Material.Slate
+        roof.Color = Color3.fromRGB(35, 35, 35)
+
+        local hallSizeX, hallSizeZ = 20, 24
+        local hallCenter = startPosition + Vector3.new(0, 0, corridorLength + hallSizeZ / 2)
+
+        local floor = Instance.new("Part", hall)
+        floor.Size = Vector3.new(hallSizeX, 1, hallSizeZ)
+        floor.Position = hallCenter + Vector3.new(0, 0.5, 0)
+        floor.Anchored = true
+        floor.Material = Enum.Material.Basalt
+        floor.Color = Color3.fromRGB(45, 45, 45)
+
+        local backWall = Instance.new("Part", hall)
+        backWall.Size = Vector3.new(hallSizeX, wallHeight, wallThickness)
+        backWall.Position = hallCenter + Vector3.new(0, wallHeight / 2, hallSizeZ / 2)
+        backWall.Anchored = true
+        backWall.Material = Enum.Material.Slate
+        backWall.Color = Color3.fromRGB(40, 40, 40)
+
+        local frontWall = backWall:Clone()
+        frontWall.Position = hallCenter + Vector3.new(0, wallHeight / 2, -hallSizeZ / 2)
+        frontWall.Parent = hall
+
+        local leftHallWall = Instance.new("Part", hall)
+        leftHallWall.Size = Vector3.new(wallThickness, wallHeight, hallSizeZ)
+        leftHallWall.Position = hallCenter + Vector3.new(-(hallSizeX / 2), wallHeight / 2, 0)
+        leftHallWall.Anchored = true
+        leftHallWall.Material = Enum.Material.Slate
+        leftHallWall.Color = Color3.fromRGB(40, 40, 40)
+
+        local rightHallWall = leftHallWall:Clone()
+        rightHallWall.Position = hallCenter + Vector3.new(hallSizeX / 2, wallHeight / 2, 0)
+        rightHallWall.Parent = hall
+
+        local ceiling = Instance.new("Part", hall)
+        ceiling.Size = Vector3.new(hallSizeX, 1, hallSizeZ)
+        ceiling.Position = hallCenter + Vector3.new(0, wallHeight, 0)
+        ceiling.Anchored = true
+        ceiling.Material = Enum.Material.Slate
+        ceiling.Color = Color3.fromRGB(35, 35, 35)
+
+        local walkway = Instance.new("Part", hall)
+        walkway.Size = Vector3.new(4, 0.3, hallSizeZ - 8)
+        walkway.Position = hallCenter + Vector3.new(0, 0.2, -2)
+        walkway.Anchored = true
+        walkway.Material = Enum.Material.Slate
+        walkway.Color = Color3.fromRGB(70, 70, 70)
+
+        local smoke = Instance.new("Smoke", walkway)
+        smoke.Color = Color3.fromRGB(200, 200, 200)
+        smoke.Opacity = 0.2
+        smoke.RiseVelocity = 2
+
+        local altar = Instance.new("Part", hall)
+        altar.Size = Vector3.new(6, 2, 6)
+        altar.Position = hallCenter + Vector3.new(0, 1, hallSizeZ / 2 - 4)
+        altar.Anchored = true
+        altar.Material = Enum.Material.Slate
+        altar.Color = Color3.fromRGB(60, 60, 60)
+
+        local statue = Instance.new("Part", hall)
+        statue.Size = Vector3.new(2, 4, 2)
+        statue.Position = altar.Position + Vector3.new(0, 3, 0)
+        statue.Anchored = true
+        statue.Material = Enum.Material.SmoothPlastic
+        statue.Color = Color3.fromRGB(80, 80, 80)
+
+        local muralLeft = Instance.new("Part", hall)
+        muralLeft.Size = Vector3.new(4, 6, 0.5)
+        muralLeft.Position = altar.Position + Vector3.new(-7, 3, 0)
+        muralLeft.Anchored = true
+        muralLeft.Material = Enum.Material.Slate
+        muralLeft.Color = Color3.fromRGB(55, 55, 55)
+
+        local muralRight = muralLeft:Clone()
+        muralRight.Position = altar.Position + Vector3.new(7, 3, 0)
+        muralRight.Parent = hall
+
+        for z = -walkway.Size.Z / 2 + 2, walkway.Size.Z / 2, 6 do
+                local candleLeft = Instance.new("Part", hall)
+                candleLeft.Shape = Enum.PartType.Cylinder
+                candleLeft.Size = Vector3.new(0.5, 1, 0.5)
+                candleLeft.Position = walkway.Position + Vector3.new(-2, 0.5, z)
+                candleLeft.Anchored = true
+                candleLeft.Material = Enum.Material.SmoothPlastic
+                candleLeft.Color = Color3.fromRGB(255, 200, 100)
+                local light = Instance.new("PointLight", candleLeft)
+                light.Brightness = 2
+                light.Range = 5
+                light.Color = Color3.fromRGB(255, 170, 80)
+
+                local candleRight = candleLeft:Clone()
+                candleRight.Position = walkway.Position + Vector3.new(2, 0.5, z)
+                candleRight.Parent = hall
+        end
+
+        local ambient = Instance.new("Sound", hall)
+        ambient.SoundId = "rbxassetid://912999977"
+        ambient.Looped = true
+        ambient.Volume = 0.3
+        ambient:Play()
+
+        return hall
+end
 local function createPyramid(baseSize, height, position, parent)
 	local pyramid = Instance.new("Model", parent)
 	pyramid.Name = "PyramidStructure"
@@ -178,4 +313,5 @@ for i, nft in pairs(nftData) do
 	createNFTDisplay(nft, interiorPosition + Vector3.new(-20 + (i - 1) * 10, 0, 0), gallery)
 end
 createNPC(interiorPosition + Vector3.new(0, 2.5, 10), gallery)
+createSpiritHall(interiorPosition + Vector3.new(0, 0, 25), gallery)
 preloadNFTImages()
