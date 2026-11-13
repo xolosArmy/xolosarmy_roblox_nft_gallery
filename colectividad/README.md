@@ -5,6 +5,7 @@ Ampliación del Museo del Itzcuintlan para el [mandato XR-ROBLOX-COLECTIVIDAD-SA
 | Revisión | Archivos |
 | --- | --- |
 | Diseño, planta y previsualizaciones | [Arquitectura](docs/arquitectura.md) |
+| Evaluación de Astra para la quinta obra | [Propuesta para aprobación](docs/etapa5.md) |
 | Inventario, anclaje, respaldo y reversión | [Integración](docs/integracion.md) |
 | PNG originales, permisos de assets y referencias criptográficas | [Obras](docs/obra.md) |
 | Pruebas automatizadas y recorrido de aceptación | [Validación](docs/validacion.md) |
