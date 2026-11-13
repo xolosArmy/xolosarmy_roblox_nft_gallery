@@ -16,7 +16,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("scene", type=Path)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--compare", type=Path, help="Planta de tres obras para componer la comparación")
+    parser.add_argument("--compare", type=Path, help="Planta de cuatro obras para componer la comparación")
     args = parser.parse_args()
     data = json.loads(args.scene.read_text())
     elements = data["parts"]
@@ -24,7 +24,7 @@ def main():
 
     paper, ink, secondary = "#f1eadd", "#202b2c", "#505854"
     earth, basalt, water = "#dfd0bb", "#303c3b", "#389b88"
-    amber, line, violet, terracotta = "#ae672d", "#a89a84", "#633b87", "#a64c39"
+    amber, line, violet, terracotta, blue = "#ae672d", "#a89a84", "#633b87", "#a64c39", "#375581"
     image = Image.new("RGB", (1430, 1200), paper)
     draw = ImageDraw.Draw(image)
     draw.text((64, 56), "Colectividad Xoloitzcuintle", font=font(48, True), fill=ink)
@@ -61,7 +61,7 @@ def main():
         ("Muro de la obra", basalt), ("Jamba", basalt), ("Panel de pizarra", "#948473"),
         ("Orilla", "#7a9a7a"), ("Agua", water), ("Paño de arcilla", "#a1582e"),
         ("Paño de obsidiana", violet), ("Paño de terracota", terracotta), ("Marco", "#a1582e"), ("Obra", "#e49847"),
-        ("Placa", "#b78957"),
+        ("Placa", "#b78957"), ("Paño de piedra azul grisácea", blue), ("CedulaIntroductoria", "#365d51"),
     ):
         for part in elements:
             if part["name"] == name:
@@ -70,6 +70,7 @@ def main():
     draw.rectangle((xy(14, 42), xy(19.4, 28)), fill="#e7bc90", outline=amber, width=2)
     draw.rectangle((xy(-19.4, 32), xy(-14, 18)), fill="#d9c6e9", outline=violet, width=2)
     draw.rectangle((xy(14, 20), xy(19.4, 5)), fill="#e8bdab", outline=terracotta, width=2)
+    draw.rectangle((xy(-19.4, 46), xy(-14, 33)), fill="#c3d3e6", outline=blue, width=2)
     for part in elements:
         if part["name"] == "Torso":
             x, _, z, *_ = part["transform"]
@@ -95,7 +96,7 @@ def main():
         if "prompt" in part:
             px, _, pz = part["prompt"]
             x, y = xy(px, pz)
-            draw.ellipse((x - 6, y - 6, x + 6, y + 6), fill="#e49847", outline=ink, width=2)
+            draw.ellipse((x - 6, y - 6, x + 6, y + 6), fill="#59917b" if part["name"] == "CedulaIntroductoria" else "#e49847", outline=ink, width=2)
 
     arrow(xy(10.1, 34.5), xy(15.2, 34.5), "#ae672d", width=3, head=9)
     draw.text(xy(20, 25.8), "Lectura 002", font=font(15, True), fill=ink, anchor="rt")
@@ -104,6 +105,10 @@ def main():
 
     arrow(xy(10.1, 12.5), xy(15.2, 12.5), terracotta, width=3, head=9)
     draw.text(xy(20, 3.8), "Lectura 004", font=font(15, True), fill=ink, anchor="rt")
+
+    arrow(xy(-10.1, 40), xy(-15.2, 40), blue, width=3, head=9)
+    draw.text(xy(-19.4, 47.3), "Lectura 005", font=font(15, True), fill=blue, anchor="lt")
+    draw.text(xy(-18.9, 3.3), "Cédula", font=font(15, True), fill="#365d51", anchor="lm")
 
     # Dimension lines sit outside the walkable plan.
     x1, top = xy(-22, 64)
@@ -123,21 +128,23 @@ def main():
     draw.line((856, 227, 856, 1115), fill=line, width=2)
     draw.text((908, 232), "Recorrido y exhibiciones", font=font(31, True), fill=ink)
     notes = [
-        ("Umbral", "Piso a cota 0. Se entra y se regresa\npor la misma abertura."),
-        ("Cauce", "Incrustación turquesa sobre piso continuo.\nCinco xolos orientados hacia la obra."),
-        ("Orillas", "Dos franjas de paso libre de 6 studs.\nCruce transversal entre Z 49 y 58."),
+        ("Umbral y cédula", "Cédula de 4.6 × 4.1, frente +X.\nCentro (−20.45, 4.35, 3.65)."),
+        ("Cauce y recorridos", "Piso continuo. Dos corredores de 6 studs.\nCruce transversal entre Z 49 y 58."),
         ("001 · Cauce del Itzcuintlan", "Muro del fondo · obra 9 × 9, frente −Z.\nCentro (0, 7.65, 62.25)."),
         ("002 · El calor de Huehueteotl", "Paño +X · obra 8 × 8, frente −X.\nCentro (20.35, 6.9, 37).\nLectura: X 14–19.4, Z 28–42."),
         ("003 · Itztlantli en el nuevo mundo", "Paño −X · obra 8 × 8, frente +X.\nCentro (−20.35, 6.9, 23).\nLectura: X −19.4 a −14, Z 18–32."),
         ("004 · Tonalli en el Xolo", "Paño +X · obra 8 × 8, frente −X.\nCentro (20.35, 6.9, 11).\nLectura: X 14–19.4, Z 5–20."),
+        ("005 · Encarnación de Xolotl", "Paño −X · obra 8 × 8, frente +X.\nCentro (−20.35, 6.9, 37).\nLectura: X −19.4 a −14, Z 33–46."),
     ]
     for index, (heading, copy) in enumerate(notes):
-        y = (289, 380, 471, 562, 657, 775, 893)[index]
+        y = (289, 380, 471, 562, 675, 788, 901)[index]
         draw.line((908, y - 12, 1363, y - 12), fill=line, width=1)
-        draw.text((909, y), heading, font=font(22, True), fill={5: violet, 6: terracotta}.get(index, amber))
+        draw.text((909, y), heading, font=font(22, True), fill={0: "#365d51", 4: violet, 5: terracotta, 6: blue}.get(index, amber))
         draw.multiline_text((909, y + 30), copy, font=font(18), fill=ink, spacing=7)
     draw.ellipse((909, 1024, 921, 1036), fill="#e49847", outline=ink, width=2)
-    draw.text((933, 1019), "Prompt · Leer ficha", font=font(17), fill=ink)
+    draw.text((933, 1019), "Leer ficha", font=font(17), fill=ink)
+    draw.ellipse((1070, 1024, 1082, 1036), fill="#59917b", outline=ink, width=2)
+    draw.text((1093, 1019), "Leer introducción", font=font(17), fill=ink)
     draw.text((908, 1055), "Altura libre: 15 studs. Cotas respecto al umbral.", font=font(16), fill=secondary)
     draw.text((908, 1083), "Implantación en el museo pendiente de inventario.", font=font(16), fill=secondary)
 
@@ -151,12 +158,12 @@ def main():
         comparison.paste(prior.crop(crop), (30, 155))
         comparison.paste(image.crop(crop), (770, 155))
         captions = ImageDraw.Draw(comparison)
-        captions.text((64, 39), "Colectividad Xoloitzcuintle · tres y cuatro obras", font=font(43, True), fill=ink)
-        captions.text((66, 107), "Etapa 3 · Tres estaciones", font=font(26, True), fill=ink)
-        captions.text((806, 107), "Etapa 4 · Tonalli en el paño +X", font=font(26, True), fill=terracotta)
+        captions.text((64, 39), "Colectividad Xoloitzcuintle · cuatro y cinco obras", font=font(43, True), fill=ink)
+        captions.text((66, 107), "Etapa 4 · Cuatro estaciones", font=font(26, True), fill=ink)
+        captions.text((806, 107), "Etapa 5 · Encarnación y cédula", font=font(26, True), fill=blue)
         captions.line((745, 107, 745, 1060), fill=line, width=2)
         captions.text((66, 1068), "Misma escala y envolvente de 44 × 64 studs", font=font(20), fill=secondary)
-        comparison.save(args.output.with_name("comparativa-etapa4.png"), optimize=True)
+        comparison.save(args.output.with_name("comparativa-etapa5.png"), optimize=True)
 
 
 if __name__ == "__main__":

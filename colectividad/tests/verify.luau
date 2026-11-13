@@ -8,6 +8,9 @@ local serde = require("@lune/serde")
 local env = table.clone(r)
 local paths = {
 	Geometry = "server/Geometry",
+	Introduction = "server/Introduction",
+	Introduccion = "shared/Introduccion",
+	ReaderView = "client/ReaderView",
 	Displays = "server/Displays",
 	Room = "server/Room",
 	Settings = "server/Settings",
@@ -15,7 +18,7 @@ local paths = {
 	ExhibitConstants = "shared/ExhibitConstants",
 }
 local catalog = serde.decode("json", fs.readFile("colectividad/src/shared/Catalogo.json"))
-local shared = { Artworks = "Artworks", ExhibitConstants = "ExhibitConstants", Catalogo = "Catalogo" }
+local shared = { Artworks = "Artworks", ExhibitConstants = "ExhibitConstants", Catalogo = "Catalogo", Introduccion = "Introduccion" }
 local workspace = r.Instance.new("Workspace")
 local studio, obstructed, levelFloor = false, false, true
 local raycasts, boxes = 0, 0
@@ -39,7 +42,7 @@ local services = {
 	Workspace = workspace,
 }
 env.game = { PlaceId = 0, GameId = 0, GetService = function(_, name) return assert(services[name], name) end }
-env.script = { Parent = { Displays = "Displays", Geometry = "Geometry", Catalogo = "Catalogo" } }
+env.script = { Parent = { Displays = "Displays", Geometry = "Geometry", Introduction = "Introduction", Catalogo = "Catalogo" } }
 env.RaycastParams = { new = function() return {} end }
 env.OverlapParams = { new = function() return {} end }
 
@@ -104,8 +107,13 @@ local works = {
 		"72a9501b398996778ff280b8f47ce76ee36b694446e417a8425c5936e8ea0daf",
 		r.Vector3.new(20.35, 6.9, 11), -r.Vector3.xAxis, 8, 6, r.Vector3.new(20.28, 4.6, 16.70),
 	},
+	["encarnacion-de-xolotl"] = {
+		"Encarnación de Xolotl", "717d555b1ecc1f701c8273fe3fb4d80954d1eca26874188584e6facd9f0634ba",
+		"c98bd3482477680413d78f82642204721e94869e4c9c78dba9ec6013ed1ff3eb",
+		r.Vector3.new(-20.35, 6.9, 37), r.Vector3.xAxis, 8, 6, r.Vector3.new(-20.28, 4.6, 44.5),
+	},
 }
-assert(#catalog.items == 4)
+assert(#catalog.items == 5)
 for _, item in catalog.items do
 	local expected = assert(works[item.slug])
 	local artwork = artworks[item.slug]
@@ -121,12 +129,59 @@ assert(room.install(settings, false) == nil)
 rejects(function() room.install(settings, true) end, "Studio sin publicar")
 studio = true
 
+local function verifyRoutes(geometry, threshold)
+	local solids = {}
+	for _, node in findAll(geometry, "BasePart") do
+		if node.CanCollide and node.Name ~= "Piso continuo" then
+			local frame = threshold:ToObjectSpace(node.CFrame)
+			local half = node.Size / 2
+			local x, y, z = frame.XVector, frame.YVector, frame.ZVector
+			local extent = r.Vector3.new(
+				math.abs(x.X) * half.X + math.abs(y.X) * half.Y + math.abs(z.X) * half.Z,
+				math.abs(x.Y) * half.X + math.abs(y.Y) * half.Y + math.abs(z.Y) * half.Z,
+				math.abs(x.Z) * half.X + math.abs(y.Z) * half.Y + math.abs(z.Z) * half.Z
+			)
+			table.insert(solids, { name = node.Name, low = frame.Position - extent, high = frame.Position + extent })
+		end
+	end
+
+	local function clear(low, high)
+		for _, solid in solids do
+			local intersects = low.X < solid.high.X and high.X > solid.low.X
+				and low.Y < solid.high.Y and high.Y > solid.low.Y
+				and low.Z < solid.high.Z and high.Z > solid.low.Z
+			assert(not intersects, "Ruta obstruida por " .. solid.name)
+		end
+	end
+
+	clear(r.Vector3.new(-5.95, 0.02, 0), r.Vector3.new(5.95, 9.9, 5))
+	clear(r.Vector3.new(-13, 0.02, 49), r.Vector3.new(13, 8, 58))
+	clear(r.Vector3.new(-19.4, 0.02, 33), r.Vector3.new(-14, 8, 46))
+	clear(r.Vector3.new(-19.4, 0.02, 2), r.Vector3.new(-14, 8, 5.7))
+	for _, center in { -10, 10 } do
+		clear(r.Vector3.new(center - 3, 0.02, 5), r.Vector3.new(center + 3, 8, 58))
+		for _, offset in { -1.5, 1.5 } do
+			clear(r.Vector3.new(center + offset - 1.25, 0.05, 5), r.Vector3.new(center + offset + 1.25, 6.05, 58))
+		end
+	end
+	for _, height in { 3.5, 5.5, 7 } do
+		for _, targetHeight in { 3.4, 7.65, 11.9 } do
+			local origin, target = r.Vector3.new(0, height, -1), r.Vector3.new(0, targetHeight, 62.1)
+			for step = 1, 124 do
+				local point = origin:Lerp(target, step / 125)
+				clear(point, point)
+			end
+		end
+	end
+end
+
 local function verifyRoom(built, threshold)
 	local geometry = built.Arquitectura
+	verifyRoutes(geometry, threshold)
 	assert(#geometry.Procesion:GetChildren() == 5)
 	assert(#findAll(geometry, "PointLight") == 10)
 	assert(#findAll(geometry, "ParticleEmitter") == 0)
-	assert(#findAll(built, "BasePart") <= 430)
+	assert(#findAll(built, "BasePart") <= 435)
 	local floor = geometry.Envolvente["Piso continuo"]
 	assert(floor.CanCollide and floor.Size == r.Vector3.new(44, 1, 64))
 	local center = threshold:PointToObjectSpace(floor.CFrame.Position)
@@ -146,12 +201,12 @@ local function verifyRoom(built, threshold)
 		end
 	end
 	local directory = geometry.Envolvente["Directorio de obras"]
-	assert(not directory.CanCollide and directory.Senal.Texto.Text:find("004  Tonalli", 1, true))
+	assert(not directory.CanCollide and directory.Senal.Texto.Text:find("005  Encarnación", 1, true))
 	assert(threshold:PointToObjectSpace(directory.CFrame.Position).Y - directory.Size.Y / 2 > 10)
 	local exhibits = built.Exhibidores
 	local promptPositions = {}
-	assert(#exhibits:GetChildren() == 4 and #findAll(exhibits, "ProximityPrompt") == 4)
-	assert(#findAll(exhibits, "SurfaceLight") == 4 and #findAll(exhibits, "ParticleEmitter") == 0)
+	assert(#exhibits:GetChildren() == 5 and #findAll(exhibits, "ProximityPrompt") == 5)
+	assert(#findAll(exhibits, "SurfaceLight") == 5 and #findAll(exhibits, "ParticleEmitter") == 0)
 	for slug, expected in works do
 		local exhibit = exhibits[slug]
 		local art = exhibit.Obra
@@ -178,6 +233,7 @@ local function verifyRoom(built, threshold)
 		{ slug = "el-calor-de-huehueteotl", side = 1, z = 30.05 },
 		{ slug = "itztlantli-en-el-nuevo-mundo", side = -1, z = 30.15 },
 		{ slug = "tonalli-en-el-xolo", side = 1, z = 16.70 },
+		{ slug = "encarnacion-de-xolotl", side = -1, z = 44.5 },
 	}
 	for _, station in sideExhibits do
 		local exhibit = exhibits[station.slug]
@@ -193,6 +249,50 @@ local function verifyRoom(built, threshold)
 		local promptOrigin = plaque.CFrame:PointToWorldSpace(plaque.PuntoDeLectura.Position)
 		local reader = threshold:PointToWorldSpace(r.Vector3.new(station.side * 15, 4, station.z))
 		assert((reader - promptOrigin).Magnitude < plaque.PuntoDeLectura[constants.promptName].MaxActivationDistance)
+	end
+	local spectral = exhibits["encarnacion-de-xolotl"]
+	local background = spectral["Paño de piedra azul grisácea"]
+	local backgroundZ = threshold:PointToObjectSpace(background.CFrame.Position).Z
+	local priorPlaque = exhibits["itztlantli-en-el-nuevo-mundo"].Placa
+	local priorEdge = threshold:PointToObjectSpace(priorPlaque.CFrame.Position).Z + priorPlaque.Size.X / 2
+	assert(near(backgroundZ - background.Size.X / 2 - priorEdge, 0.35))
+	local nextRelief
+	for _, node in geometry["Relieves del valle"]:GetChildren() do
+		local position = threshold:PointToObjectSpace(node.CFrame.Position)
+		if node.Name == "Panel de pizarra" and position.X < 0 and near(position.Z, 51) then
+			nextRelief = node
+		end
+	end
+	assert(nextRelief)
+	local nextEdge = threshold:PointToObjectSpace(nextRelief.CFrame.Position).Z - nextRelief.Size.Z / 2
+	local plaqueEdge = threshold:PointToObjectSpace(spectral.Placa.CFrame.Position).Z + spectral.Placa.Size.X / 2
+	assert(near(nextEdge - plaqueEdge, 0.2) and near(49 - plaqueEdge, 3))
+	assert(spectral.Iluminacion.SurfaceLight.Range == 9 and not spectral.Iluminacion.SurfaceLight.Shadows)
+	local memoryCount = 0
+	for _, node in geometry["Viento, cempasúchil y memoria"]:GetChildren() do
+		if node.Name == "Memoria" then
+			local position = threshold:PointToObjectSpace(node.CFrame.Position)
+			assert(near(position.X, -20.4) and math.abs(position.Y - 8.1) < 0.85 and math.abs(position.Z - 44.5) < 0.85)
+			memoryCount += 1
+		end
+	end
+	assert(memoryCount == 12)
+
+	local panel = built[constants.introPanelName]
+	local entryPrompt = panel.PuntoDeLectura[constants.introPromptName]
+	local position = threshold:PointToObjectSpace(panel.CFrame.Position)
+	assert((position - r.Vector3.new(-20.45, 4.35, 3.65)).Magnitude < 0.001)
+	assert(near(panel.CFrame.LookVector:Dot(threshold.XVector), 1))
+	assert(position.X + panel.Size.Z / 2 < -19.4 and not panel.CanCollide and not panel.CanTouch)
+	assert(position.Z + panel.Size.X / 2 < 6.2)
+	assert(panel.Cedula.Titulo.Text == load("Introduccion").title)
+	assert(panel.Cedula.Extracto.Text == load("Introduccion").paragraphs[1])
+	assert(entryPrompt.ActionText == "Leer introducción" and entryPrompt.RequiresLineOfSight and entryPrompt.ClickablePrompt)
+	assert(#findAll(built, "ProximityPrompt") == 6)
+	local introOrigin = panel.CFrame:PointToWorldSpace(entryPrompt.Parent.Position)
+	assert((threshold:PointToWorldSpace(r.Vector3.new(-15, 4, 4)) - introOrigin).Magnitude < entryPrompt.MaxActivationDistance)
+	for _, other in promptPositions do
+		assert((introOrigin - other.position).Magnitude > entryPrompt.MaxActivationDistance + other.range)
 	end
 	local hearth = exhibits["el-calor-de-huehueteotl"]
 	assert(hearth:FindFirstChild("Petate") and hearth:FindFirstChild("Fuego simbólico"))
@@ -259,7 +359,7 @@ levelFloor = true
 obstructed = true
 rejects(function() room.install(reviewed, false) end, "volumen reservado")
 obstructed = false
-reviewed.ImageIds["tonalli-en-el-xolo"] = "https://example.invalid/imagen.png"
+reviewed.ImageIds["encarnacion-de-xolotl"] = "https://example.invalid/imagen.png"
 rejects(function() room.install(reviewed, false) end, "ID de imagen inválido")
 assert(workspace:FindFirstChild(constants.roomName) == nil)
 reviewed.ImageIds = {}
@@ -294,11 +394,15 @@ local function signal()
 end
 
 -- Run the actual LocalScript with synthetic Roblox signals.
-local activated = signal()
+local activations = {}
+local inputType = r.Enum.UserInputType.Touch
 r.implementMethod("Instance", "WaitForChild", function(node, name)
 	return assert(node:FindFirstChild(name), name)
 end)
-r.implementProperty("GuiButton", "Activated", function() return activated end)
+r.implementProperty("GuiButton", "Activated", function(node)
+	activations[node] = activations[node] or signal()
+	return activations[node]
+end)
 r.implementProperty("Instance", "Destroying", signal)
 local playerGui = r.Instance.new("PlayerGui")
 local player = {
@@ -314,6 +418,7 @@ local clientShared = {
 	GetAttribute = function(_, name) return name == constants.readyAttribute end,
 }
 local bindings = 0
+local actions = {}
 local clientServices = {
 	Players = { LocalPlayer = player },
 	ProximityPromptService = { PromptTriggered = promptTriggered },
@@ -325,10 +430,18 @@ local clientServices = {
 	},
 	Workspace = workspace,
 	GuiService = {},
-	UserInputService = { GetLastInputType = function() return r.Enum.UserInputType.Touch end },
+	UserInputService = { GetLastInputType = function() return inputType end },
 	ContextActionService = {
-		BindAction = function() bindings += 1 end,
-		UnbindAction = function() bindings -= 1 end,
+		BindAction = function(_, name, callback)
+			assert(not actions[name])
+			actions[name] = callback
+			bindings += 1
+		end,
+		UnbindAction = function(_, name)
+			assert(actions[name])
+			actions[name] = nil
+			bindings -= 1
+		end,
 	},
 	CollectionService = {
 		GetTagged = function() return {} end,
@@ -338,15 +451,28 @@ local clientServices = {
 }
 local clientEnv = table.clone(r)
 clientEnv.game = { GetService = function(_, name) return assert(clientServices[name], name) end }
-clientEnv.require = load
-local clientPath = "colectividad/src/client/Exhibit.client.luau"
-local function runClient()
-	luau.load(fs.readFile(clientPath), { debugName = clientPath, environment = clientEnv })()
+clientEnv.require = function(name)
+	if name == "ReaderView" and not modules.ReaderView then
+		local path = "colectividad/src/client/ReaderView.luau"
+		modules.ReaderView = luau.load(fs.readFile(path), { debugName = path, environment = clientEnv })()
+	end
+	return load(name)
 end
-runClient()
-runClient()
-assert(#playerGui:GetChildren() == 1 and promptTriggered:count() == 1 and activated:count() == 1)
+clientEnv.script = { Parent = { ReaderView = "ReaderView" } }
+local function runClient(name)
+	local path = "colectividad/src/client/" .. name .. ".client.luau"
+	luau.load(fs.readFile(path), { debugName = path, environment = clientEnv })()
+end
+runClient("Exhibit")
+runClient("Introduction")
+runClient("Exhibit")
+runClient("Introduction")
+assert(#playerGui:GetChildren() == 2 and promptTriggered:count() == 2)
 local gui = playerGui[constants.guiName]
+local introGui = playerGui[constants.introGuiName]
+local activated = activations[gui.Ficha.Cerrar]
+local introActivated = activations[introGui.Ficha.Cerrar]
+assert(activated:count() == 1 and introActivated:count() == 1)
 local scroller = gui.Ficha.Contenido
 assert(gui.ScreenInsets == r.Enum.ScreenInsets.CoreUISafeInsets)
 assert(scroller.AutomaticCanvasSize == r.Enum.AutomaticSize.Y and scroller.Token.TextWrapped and scroller.Anuncio.TextWrapped)
@@ -364,7 +490,8 @@ foreign:SetAttribute(constants.artworkAttribute, calor)
 promptTriggered:emit(foreign, player)
 assert(not gui.Enabled and bindings == 0)
 local tonalli = "tonalli-en-el-xolo"
-for _, slug in { cauce, tonalli, itztlantli, calor, tonalli, cauce } do
+local encarnacion = "encarnacion-de-xolotl"
+for _, slug in { cauce, tonalli, encarnacion, itztlantli, calor, encarnacion, cauce } do
 	promptTriggered:emit(prompts[slug], player)
 	local expected = works[slug]
 	assert(gui.Enabled and scroller.Obra.Text == expected[1] and scroller.Edicion.Text:find("1/1", 1, true))
@@ -382,7 +509,39 @@ prompts[tonalli]:SetAttribute(constants.artworkAttribute, tonalli)
 promptTriggered:emit(prompts[tonalli], player)
 player.CharacterRemoving:emit()
 assert(not gui.Enabled and bindings == 0)
-print("OK: fichas correctas al alternar obras, aislamiento de prompts y una sola GUI y suscripción")
+local introPrompt = built[constants.introPanelName].PuntoDeLectura[constants.introPromptName]
+local introCopy = load("Introduccion")
+local introText = introGui.Ficha.Contenido
+assert(introGui.ScreenInsets == r.Enum.ScreenInsets.CoreUISafeInsets and not introGui.ResetOnSpawn)
+assert(introText.AutomaticCanvasSize == r.Enum.AutomaticSize.Y and introText.Selectable)
+assert(introGui.Ficha.Cerrar.Size.Y.Offset >= 44 and introGui.Ficha.Cerrar.NextSelectionDown == introText)
+assert(introText.Titulo.Text == introCopy.title and introText.Credito.Text == introCopy.credit)
+for index, paragraph in introCopy.paragraphs do
+	local label = introText["Parrafo" .. index]
+	assert(label.Text == paragraph and label.TextWrapped and label.TextSize >= 16)
+end
+promptTriggered:emit(introPrompt, {})
+promptTriggered:emit(part(hall, "ProximityPrompt", constants.introPromptName), player)
+assert(not introGui.Enabled and bindings == 0)
+promptTriggered:emit(introPrompt, player)
+assert(introGui.Enabled and not gui.Enabled and bindings == 1)
+promptTriggered:emit(prompts[encarnacion], player)
+assert(gui.Enabled and not introGui.Enabled and bindings == 1 and scroller.Token.Text == works[encarnacion][2])
+inputType = r.Enum.UserInputType.Gamepad1
+promptTriggered:emit(introPrompt, player)
+assert(introGui.Enabled and not gui.Enabled and bindings == 1)
+assert(clientServices.GuiService.SelectedObject == introGui.Ficha.Cerrar)
+actions.ColectividadCerrarIntroduccion(nil, r.Enum.UserInputState.Begin)
+assert(not introGui.Enabled and not gui.Enabled and bindings == 0)
+promptTriggered:emit(introPrompt, player)
+introActivated:emit()
+assert(not introGui.Enabled and bindings == 0)
+promptTriggered:emit(introPrompt, player)
+player.CharacterRemoving:emit()
+assert(not introGui.Enabled and not gui.Enabled and bindings == 0)
+print("OK: introducción accesible, foco exclusivo, cierre y reaparición")
+
+print("OK: fichas correctas al alternar obras, aislamiento de prompts y una GUI y suscripción por lector")
 
 if process.args[1] then
 	local demoPlace = r.deserializePlace(fs.readFile(process.args[1]))
@@ -394,6 +553,8 @@ if process.args[1] then
 	for _, work in works do
 		assert(sharedPackage.Catalogo.Source:find(work[2], 1, true))
 	end
-	assert(demoPlace.StarterPlayer.StarterPlayerScripts.ColectividadXoloitzcuintle.Exhibit:IsA("LocalScript"))
+	local clients = demoPlace.StarterPlayer.StarterPlayerScripts.ColectividadXoloitzcuintle
+	assert(clients.Exhibit:IsA("LocalScript") and clients.Introduction:IsA("LocalScript"))
+	assert(clients.ReaderView:IsA("ModuleScript") and sharedPackage.Introduccion:IsA("ModuleScript"))
 	print("OK: artefacto Rojo y atributo de maqueta")
 end

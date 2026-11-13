@@ -18,7 +18,8 @@
         "Settings": { "$path": "src/server/Settings.luau" },
         "Room": { "$path": "src/server/Room.luau" },
         "Displays": { "$path": "src/server/Displays.luau" },
-        "Geometry": { "$path": "src/server/Geometry.luau" }
+        "Geometry": { "$path": "src/server/Geometry.luau" },
+        "Introduction": { "$path": "src/server/Introduction.luau" }
       }
     },
     "StarterPlayer": {

@@ -114,7 +114,7 @@ local function buildShell(parent, root, demo)
 	local directory = part(shell, "Directorio de obras", Vector3.new(13, 3.12, 0.30),
 		root * CFrame.new(0, 12.32, 15), stone.obsidian, Enum.Material.SmoothPlastic)
 	surfaceSign(directory, Enum.NormalId.Front,
-		"↑  001  Cauce del Itzcuintlan\n←  004  Tonalli en el Xolo\n→  003  Itztlantli en el nuevo mundo\n←  002  El calor de Huehueteotl", 27)
+		"↑  001  Cauce del Itzcuintlan\n←  004  Tonalli en el Xolo\n→  003  Itztlantli en el nuevo mundo\n←  002  El calor de Huehueteotl\n→  005  Encarnación de Xolotl", 24)
 end
 
 local function buildRiver(parent, root)
@@ -185,7 +185,7 @@ local function buildReliefs(parent, root)
 	local reliefs = group(parent, "Relieves del valle")
 	for _, side in ipairs({-1, 1}) do
 		for bay, z in ipairs({11, 23, 37, 51}) do
-			if (side == 1 and (z == 11 or z == 37)) or (side == -1 and z == 23) then
+			if (side == 1 and (z == 11 or z == 37)) or (side == -1 and (z == 23 or z == 37)) then
 				continue -- These wall bays house the lateral exhibits.
 			end
 			local panel = root * CFrame.new(side * 20.65, 4.4, z)
@@ -219,12 +219,13 @@ local function buildReliefs(parent, root)
 		part(motifs, "Cempasúchil", Vector3.new(0.08, 0.53, 0.18), frame,
 			stone.amber, Enum.Material.SmoothPlastic, false, Enum.PartType.Ball)
 	end
+	local memory = Vector3.new(-20.4, 8.1, 44.5)
 	for ring = 1, 3 do
 		local radius = ring * 0.28
 		for edge = 0, 3 do
 			local a, b = edge * math.pi / 2, (edge + 1) * math.pi / 2
-			line(motifs, "Memoria", root, Vector3.new(-20.4, 6.9 + math.cos(a) * radius, 37 + math.sin(a) * radius),
-				Vector3.new(-20.4, 6.9 + math.cos(b) * radius, 37 + math.sin(b) * radius),
+			line(motifs, "Memoria", root, memory + Vector3.new(0, math.cos(a) * radius, math.sin(a) * radius),
+				memory + Vector3.new(0, math.cos(b) * radius, math.sin(b) * radius),
 				0.065, 0.065, stone.ochre, Enum.Material.SmoothPlastic)
 		end
 	end

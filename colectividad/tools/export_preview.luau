@@ -26,6 +26,7 @@ displayEnvironment.game = {
 			ColectividadXoloitzcuintle = {
 				Artworks = "shared/Artworks.luau",
 				ExhibitConstants = "shared/ExhibitConstants.luau",
+				Introduccion = "shared/Introduccion.luau",
 			},
 		}
 	end,
@@ -39,6 +40,7 @@ end
 environment.require = requireModule
 displayEnvironment.require = requireModule
 loadModule("server/Displays.luau", displayEnvironment).build(room, roblox.CFrame.identity, {})
+loadModule("server/Introduction.luau", displayEnvironment).build(room, roblox.CFrame.identity)
 
 local function vector(value)
 	return { value.X, value.Y, value.Z }
@@ -71,6 +73,7 @@ for _, object in ipairs(room:GetDescendants()) do
 							y = label.Position.Y.Scale,
 							w = label.Size.X.Scale,
 							h = label.Size.Y.Scale,
+							size = label.TextSize,
 						})
 					end
 				end
@@ -82,4 +85,4 @@ for _, object in ipairs(room:GetDescendants()) do
 end
 
 fs.writeFile(outputPath, serde.encode("json", { parts = elements, catalog = catalog.items }))
-print(`{#elements} piezas exportadas desde Geometry.luau y Displays.luau`)
+print(`{#elements} piezas exportadas desde los módulos Luau`)

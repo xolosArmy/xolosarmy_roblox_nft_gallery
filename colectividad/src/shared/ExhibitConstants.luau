@@ -8,4 +8,7 @@ return table.freeze({
 	artworkAttribute = "ColectividadArtwork",
 	imageTag = "ColectividadArtworkImage",
 	guiName = "ColectividadFichaCuratorial",
+	introPanelName = "CedulaIntroductoria",
+	introPromptName = "ColectividadIntroductionPrompt",
+	introGuiName = "ColectividadIntroduccion",
 })

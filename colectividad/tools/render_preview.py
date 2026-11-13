@@ -4,6 +4,7 @@ import hashlib
 import json
 import math
 import sys
+import textwrap
 from pathlib import Path
 
 import bpy
@@ -15,7 +16,7 @@ def arguments():
     parser.add_argument("scene", type=Path)
     parser.add_argument("originals", type=Path, help="Directory with the original PNGs, named by slug")
     parser.add_argument("output", type=Path)
-    parser.add_argument("--views", nargs="+", default=["entrada", "procesion", "obra", "huehueteotl", "itztlantli", "tonalli", "cuatro-estaciones", "retorno", "axonometria"])
+    parser.add_argument("--views", nargs="+", default=["entrada", "procesion", "obra", "huehueteotl", "itztlantli", "tonalli", "encarnacion", "introduccion", "cinco-estaciones", "retorno", "axonometria"])
     return parser.parse_args(sys.argv[sys.argv.index("--") + 1 :])
 
 
@@ -204,8 +205,17 @@ def main(args):
             for label in part["signs"][0]["labels"]:
                 y = part["size"][1] * (0.5 - label["y"] - label["h"] / 2)
                 x = -part["size"][0] * (label["x"] + label["w"] / 2 - 0.5)
-                sign_text("Directorio", label["text"], 0.39, frame,
+                sign_text("Directorio", label["text"], 0.31, frame,
                           (x, y, -part["size"][2] / 2 - 0.014), text)
+        elif part["name"] == "CedulaIntroductoria":
+            width, height, depth = part["size"]
+            for label in part["signs"][0]["labels"]:
+                size = label["size"] / 100
+                columns = 23 if label["y"] < 0.2 else 33
+                copy = textwrap.fill(label["text"], columns)
+                y = height * (0.5 - label["y"] - label["h"] / 2)
+                sign_text("Cédula de entrada", copy, size, frame,
+                          (0, y, -depth / 2 - 0.014), text)
         elif part["name"] == "Placa":
             w, h, depth = part["size"]
             for label in part["signs"][0]["labels"]:
@@ -221,6 +231,8 @@ def main(args):
     area("Luz del petate", (18.1, 10.7, 36.5), (20, 2.4, 36.5), 530, 4, (1, 0.61, 0.30))
     area("Luz violeta del eclipse", (-18.1, 10.65, 23.0), (-20, 4.1, 22.6), 580, 4, (0.61, 0.40, 1.0))
     area("Luz solar de terracota", (17.9, 11, 10), (20, 4.5, 11), 610, 4, (1, 0.72, 0.42))
+    area("Luz de Venus", (-18.7, 10.5, 37), (-20, 5, 37), 310, 3.4, (0.48, 0.61, 0.95))
+    area("Luz de lectura", (-17.5, 7, 4), (-20, 4.5, 3.65), 165, 3, (1, 0.86, 0.68))
     area("Luz rasante del cauce", (0, 11.6, 29), (0, 0, 31), 780, 12, (0.62, 0.86, 0.89))
     area("Luz del acceso", (0, 9, -5), (0, 7, 1), 540, 7, (1, 0.8, 0.63))
 
@@ -235,7 +247,9 @@ def main(args):
         "huehueteotl": ((3.5, 5.5, 32.2), (20, 6.5, 36.6), 27),
         "itztlantli": ((-4.0, 5.5, 23.4), (-20, 6.1, 23.5), 25),
         "tonalli": ((3.6, 5.6, 11.6), (20, 6.15, 11.45), 26),
-        "cuatro-estaciones": ((-7.5, 6.25, 1.9), (6, 6.1, 40), 9.5),
+        "encarnacion": ((-4.2, 5.7, 38.8), (-20, 6.2, 38.5), 25),
+        "introduccion": ((-11.5, 4.9, 4.7), (-20.3, 4.35, 3.65), 33),
+        "cinco-estaciones": ((-7.5, 6.25, 1.9), (6, 6.1, 40), 9.5),
         "retorno": ((9.5, 5.65, 47), (0, 6.3, 0), 24),
     }
     for name, parameters in views.items():

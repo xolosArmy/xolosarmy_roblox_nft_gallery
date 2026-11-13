@@ -5,6 +5,7 @@ local Workspace = game:GetService("Workspace")
 local constants = require(ReplicatedStorage.ColectividadXoloitzcuintle.ExhibitConstants)
 local Displays = require(script.Parent.Displays)
 local Geometry = require(script.Parent.Geometry)
+local Introduction = require(script.Parent.Introduction)
 
 local Room = {}
 
@@ -141,6 +142,7 @@ function Room.install(settings, demo)
 		end
 		Geometry.build(room, threshold, demo)
 		Displays.build(room, threshold, settings.ImageIds)
+		Introduction.build(room, threshold)
 	end)
 	if not success then
 		room:Destroy()

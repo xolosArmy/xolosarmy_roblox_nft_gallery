@@ -163,6 +163,27 @@ local function buildTonalli(exhibit, frame)
 	end
 end
 
+local function buildIncarnation(exhibit, frame)
+	local stone = Color3.fromRGB(57, 68, 80)
+	local eveningLight = Color3.fromRGB(193, 210, 224)
+	local water = Color3.fromRGB(52, 75, 94)
+
+	panelPart(exhibit, "Paño de piedra azul grisácea", frame * CFrame.new(0, 0, 0.45),
+		Vector3.new(9.2, 11.6, 0.28), stone)
+
+	local venus = panelPart(exhibit, "Venus vespertina", frame * CFrame.new(3.1, 4.85, 0.22),
+		Vector3.new(0.36, 0.36, 0.26), eveningLight)
+	venus.Shape = Enum.PartType.Ball
+	venus.Material = Enum.Material.Neon
+
+	for band, width in ipairs({1.5, 2.8, 4.1}) do
+		local reflection = panelPart(exhibit, "Reflejo de Venus",
+			frame * CFrame.new(0.25, -4.42 - band * 0.29, 0.25),
+			Vector3.new(width, 0.045, 0.15), water:Lerp(eveningLight, 0.50 - band * 0.12))
+		reflection.Material = Enum.Material.SmoothPlastic
+	end
+end
+
 local slots = {
 	{
 		artworkId = "cauce-del-itzcuintlan",
@@ -206,6 +227,19 @@ local slots = {
 		lightColor = Color3.fromRGB(249, 204, 144),
 		accent = Color3.fromRGB(218, 164, 110),
 		decorate = buildTonalli,
+	},
+	{
+		artworkId = "encarnacion-de-xolotl",
+		artFrame = CFrame.new(-20.35, 6.9, 37) * CFrame.Angles(0, -math.pi / 2, 0),
+		plaqueFrame = CFrame.new(-20.28, 4.6, 44.5) * CFrame.Angles(0, -math.pi / 2, 0),
+		artSize = 8,
+		plaqueWidth = 3,
+		plaqueTitleSize = 30,
+		promptRange = 6,
+		lightColor = Color3.fromRGB(166, 194, 221),
+		lightRange = 9,
+		accent = Color3.fromRGB(193, 210, 224),
+		decorate = buildIncarnation,
 	},
 }
 
@@ -265,7 +299,8 @@ local function buildSlot(parent, threshold, slot, artwork, contentId)
 	light.Angle = 115
 	light.Brightness = 1.5
 	light.Color = slot.lightColor
-	light.Range = 13
+	light.Range = slot.lightRange or 13
+	light.Shadows = false
 	light.Parent = lamp
 
 	if slot.decorate then

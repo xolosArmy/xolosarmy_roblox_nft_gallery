@@ -1,6 +1,6 @@
 # Obras de Colectividad Xoloitzcuintle
 
-Cuatro obras digitales de **xolosArmy Network**, creadas el 13 de noviembre de 2026. Las cuatro son ediciones 1/1 minteadas como SLP NFT1 Child en eCash dentro de **xolosArmy Community**. Los NFT de linaje corresponden a **xolosArmy Official**. El [catálogo canónico](https://xolosarmy.xyz/blog/colectividad-xoloitzcuintle/catalogo.json) tiene una selección de las cuatro obras montadas en la [copia local para la sala](../src/shared/Catalogo.json) y alimenta las fichas Luau.
+Cinco obras digitales de **xolosArmy Network**, creadas el 13 de noviembre de 2026. Las cinco son ediciones 1/1 minteadas como SLP NFT1 Child en eCash dentro de **xolosArmy Community**. Los NFT de linaje corresponden a **xolosArmy Official**. El [catálogo canónico](https://xolosarmy.xyz/blog/colectividad-xoloitzcuintle/catalogo.json) se conserva en la [copia local para la sala](../src/shared/Catalogo.json) y alimenta las fichas Luau.
 
 ## 001 · Cauce del Itzcuintlan
 
@@ -34,6 +34,14 @@ Un xolo de barro suspendido sobre el valle evoca la cerámica canina de Colima y
 - Anuncio Tonalli Memo TM1 `72a9501b398996778ff280b8f47ce76ee36b694446e417a8425c5936e8ea0daf`, bloque 975408. [Anuncio](https://explorer.xolosarmy.xyz/tx/72a9501b398996778ff280b8f47ce76ee36b694446e417a8425c5936e8ea0daf).
 - PNG original de 1254 × 1254 px. SHA-256 `ec9c6ce801b1934e7993b7db8f520e986923d395ee7c8689c849d4fd98edc93b`. [PNG](https://xolosarmy.xyz/assets/colectividad-xoloitzcuintle/tonalli-en-el-xolo.png).
 
+## 005 · Encarnación de Xolotl
+
+Un xoloitzcuintle espectral de anatomía imposible bebe de un estanque oscuro donde se refleja Venus vespertina. El caracol abierto acompaña una lectura surrealista de vulnerabilidad y transformación. El montaje mural evoca el agua con tres filetes y un punto de luz sobre piedra azul grisácea. [Ficha curatorial](https://xolosarmy.xyz/blog/colectividad-xoloitzcuintle/encarnacion-de-xolotl/).
+
+- Token y minteo `717d555b1ecc1f701c8273fe3fb4d80954d1eca26874188584e6facd9f0634ba`, bloque 975410. [Token](https://explorer.xolosarmy.xyz/token/717d555b1ecc1f701c8273fe3fb4d80954d1eca26874188584e6facd9f0634ba) · [Minteo](https://explorer.xolosarmy.xyz/tx/717d555b1ecc1f701c8273fe3fb4d80954d1eca26874188584e6facd9f0634ba).
+- Anuncio Tonalli Memo TM1 `c98bd3482477680413d78f82642204721e94869e4c9c78dba9ec6013ed1ff3eb`, bloque 975410. [Anuncio](https://explorer.xolosarmy.xyz/tx/c98bd3482477680413d78f82642204721e94869e4c9c78dba9ec6013ed1ff3eb).
+- PNG original de 1254 × 1254 px y 3,125,566 bytes. SHA-256 `7d05313c724e45cbc8e8daf9124dc18b36902de242f13991f313df19e2da6709`. [PNG](https://xolosarmy.xyz/assets/colectividad-xoloitzcuintle/encarnacion-de-xolotl.png).
+
 Se verificó en el nodo que usa Xolos Explorer que los minteos pertenecen al grupo padre del catálogo y que cada anuncio contiene el ID de su obra. La ficha del visitante muestra Xolos Explorer y los identificadores completos. Roblox restringe los enlaces directos en la experiencia. La sala y las fichas están disponibles para cualquier visitante. [Política de Roblox](https://en.help.roblox.com/hc/en-us/articles/360000910966-Social-Media-Links-for-Experiences-Communities).
 
 ## Verificar e importar los originales
@@ -61,8 +69,8 @@ for item in catalog["items"]:
 PY
 ```
 
-1. Importa los cuatro PNG intactos como **Image** con una cuenta autorizada para administrar assets del universo de prueba. Usa Asset Manager o Importer de Studio. [Importador de Studio](https://create.roblox.com/docs/studio/importer).
+1. Importa los cinco PNG intactos como **Image** con una cuenta autorizada para administrar assets del universo de prueba. Usa Asset Manager o Importer de Studio. [Importador de Studio](https://create.roblox.com/docs/studio/importer).
 2. Tras la moderación, comprueba los permisos del universo de prueba. Configura el ID de contenido **Image** de cada pieza en `ImageIds` de `src/server/Settings.luau` bajo la clave de su slug. Si partiste de un Decal, verifica el ID de la textura. [Moderación de assets](https://en.help.roblox.com/hc/en-us/articles/21416271342868-Content-Moderation-on-Roblox).
-3. En Play, verifica con una cuenta visitante que los cuatro originales cargan con ajuste **Fit**, muestran sus cuatro esquinas y conservan la atribución. Roblox procesa su propia copia para servirla en el motor. Conserva el PNG fuente verificado como referencia.
+3. En Play, verifica con una cuenta visitante que los cinco originales cargan con ajuste **Fit**, muestran sus cuatro esquinas y conservan la atribución. Roblox procesa su propia copia para servirla en el motor. Conserva el PNG fuente verificado como referencia.
 
-Los cuatro marcos muestran un aviso mientras estén pendientes los IDs autorizados. Las placas y las fichas están disponibles durante la prueba local.
+Los cinco marcos muestran un aviso mientras estén pendientes los IDs autorizados. Las placas y las fichas están disponibles durante la prueba local.

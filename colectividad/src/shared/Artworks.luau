@@ -17,6 +17,10 @@ local interpretation = {
 		plaque = "Barro, sol y tres cactus floridos",
 		summary = "Un xoloitzcuintle de barro suspendido sobre el valle evoca la cerámica de perros de Colima y el paisaje de José María Velasco. El sol ilumina su cuerpo de terracota, que refleja la luz hacia tres cactus floridos. Los cactus representan a su familia humana y el xolo enlaza la tierra, el sol y la familia.",
 	},
+	["encarnacion-de-xolotl"] = {
+		plaque = "Venus vespertina y su reflejo en el estanque",
+		summary = "Un xoloitzcuintle espectral bebe de un estanque oscuro donde se refleja Venus vespertina. En la orilla, la espiral abierta de un caracol rojo acompaña una reflexión sobre la vulnerabilidad y la transformación en el tránsito entre mundos.",
+	},
 }
 
 local months = {

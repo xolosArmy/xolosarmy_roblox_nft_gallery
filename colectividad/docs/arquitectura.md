@@ -1,8 +1,8 @@
 # Arquitectura de Colectividad Xoloitzcuintle
 
-Desde el umbral, el cauce turquesa y las cinco figuras de basalto mantienen el eje hacia «Cauce del Itzcuintlan». En +X, «Tonalli en el Xolo» abre el recorrido con terracota, luz solar y tres cactus floridos. Más adelante se alternan el eclipse violeta de «Itztlantli en el nuevo mundo» en −X y el brasero ámbar de «El calor de Huehueteotl» en +X. Cada obra lateral tiene su propia franja de lectura a la cota del piso.
+Desde el umbral, el cauce turquesa y las cinco figuras de basalto mantienen el eje hacia «Cauce del Itzcuintlan». En +X, «Tonalli en el Xolo» abre el recorrido con terracota, luz solar y tres cactus floridos. Más adelante se alternan el eclipse violeta de «Itztlantli en el nuevo mundo» en −X y el brasero ámbar de «El calor de Huehueteotl» en +X. «Encarnación de Xolotl» ocupa el paño −X frente a Huehueteotl, con una alusión al reflejo de Venus sobre piedra azul grisácea. Cada obra lateral tiene su propia franja de lectura a la cota del piso.
 
-![Planta acotada con cuatro exhibiciones, prompts y circulación](evidencia/planta.png)
+![Planta acotada con cinco exhibiciones, prompts y circulación](evidencia/planta.png)
 
 | Elemento | Medidas y cotas locales en studs |
 | --- | --- |
@@ -18,26 +18,33 @@ Desde el umbral, el cauce turquesa y las cinco figuras de basalto mantienen el e
 | Lectura 003 | X −19.4…−14, Z 18…32. El corredor −X ocupa X −13…−7. El eclipse y el marco están montados en pared. |
 | 004 · Tonalli en el Xolo | Obra 8 × 8 en (20.35, 6.9, 11), frente −X. Placa en (20.28, 4.6, 16.70) y prompt en (19.78, 3.85, 16.70), con alcance de 6 studs. |
 | Lectura 004 | X 14…19.4, Z 5…20. La placa termina en Z 18.0 y el paño siguiente empieza en Z 18.2. El prompt de 004 queda a 13.35 studs del de 002, con radios de 6 y 7. |
-| Directorio | Centro (0, 12.32, 15), frente al acceso (−Z) y borde inferior Y 10.76. Las flechas indican 004 y 002 a la izquierda del visitante, 003 a la derecha y 001 al fondo. |
+| 005 · Encarnación de Xolotl | Obra 8 × 8 en (−20.35, 6.9, 37), frente +X. Placa de 3 × 3.15 en (−20.28, 4.6, 44.5) y prompt en (−19.78, 3.85, 44.5), con alcance de 6 studs. |
+| Lectura 005 | X −19.4…−14, Z 33…46. Queda 1 stud hasta el corredor y 3 hasta el cruce. El motivo «Memoria» conserva sus 12 piezas y se traslada como conjunto sobre la placa, con centro (−20.4, 8.1, 44.5). |
+| Cédula de Xólotl | Panel de 4.6 × 4.1 en (−20.45, 4.35, 3.65), frente +X. Prompt de 6 studs en (−19.95, 3.75, 3.65). El texto completo tiene cuatro párrafos (59 palabras) y crédito en una interfaz desplazable. |
+| Directorio | Centro (0, 12.32, 15), frente al acceso (−Z) y borde inferior Y 10.76. Las flechas indican 004 y 002 a la izquierda del visitante, 003 y 005 a la derecha y 001 al fondo. |
 | Expansión | Los otros paños de pizarra siguen disponibles. `Catalogo.json` aporta los metadatos de la serie, `Artworks.luau` los textos interpretativos y `Displays.luau` las posiciones, giros y dimensiones del montaje. |
 
 La ficha amplía la placa con texto de alto contraste y desplazamiento vertical. La validación de cámara, navegación y legibilidad en dispositivo está en la [lista de aceptación](validacion.md).
 
 ## Comparación para revisión con Astra
 
-El paño +X a Z 11 ofrece un primer punto de lectura lateral entre el acceso y Huehueteotl. La alternativa −X a Z 51 situaría la lectura junto al cruce transversal Z 49…58 y competiría con la aproximación a 001. La planta conserva los corredores de 6 studs y la envolvente de 44 × 64. [Comparativa de tres y cuatro estaciones a la misma escala](evidencia/comparativa-etapa4.png).
+La cédula ocupa un tramo de muro −X anterior al primer relieve. Su borde termina en Z 5.95 y el relieve empieza en Z 6.2. El paño +X en el acceso reúne la primera exhibición y su área de lectura. La posición elegida para la cédula deja su prompt en el lado contrario, con el directorio elevado en Z 15. La lectura se hace junto al muro, fuera del paso hacia 001.
+
+El montaje de Encarnación sigue el [dictamen de Astra](etapa5.md). El fondo de 9.2 studs deja 0.35 hasta la placa de 003. La placa de 005 deja 0.20 hasta el siguiente paño. Las cotas se comprobaron con las piezas exportadas. La lectura simultánea, el giro de cámara y la jerarquía desde el umbral requieren una visita en Studio. [Comparativa de cuatro y cinco estaciones a la misma escala](evidencia/comparativa-etapa5.png).
 
 ## Previsualización
 
-Blender usa las posiciones, medidas, colores y rótulos exportados desde Luau. Sus luces y cámaras son de previsualización. Las cuatro obras se muestran con sus PNG canónicos verificados. Los marcos de la maqueta Roblox muestran el aviso de asset pendiente.
+Blender usa las posiciones, medidas, colores y rótulos exportados desde Luau. Sus luces y cámaras son de previsualización. Las cinco obras se muestran con sus PNG canónicos verificados. Los marcos de la maqueta Roblox muestran el aviso de asset pendiente.
 
 | Vista | Imagen |
 | --- | --- |
-| Cuatro exhibiciones | [Perspectiva de conjunto](evidencia/cuatro-estaciones.jpg) |
+| Cinco exhibiciones | [Perspectiva de conjunto](evidencia/cinco-estaciones.jpg) |
 | Cauce del Itzcuintlan | [Marco y placa](evidencia/obra.jpg) |
 | El calor de Huehueteotl | [Marco, placa, petate y brasero](evidencia/huehueteotl.jpg) |
 | Itztlantli en el nuevo mundo | [Marco, placa y eclipse](evidencia/itztlantli.jpg) |
 | Tonalli en el Xolo | [Terracota, sol y tres cactus](evidencia/tonalli.jpg) |
+| Encarnación de Xolotl | [Marco, Venus y motivo «Memoria»](evidencia/encarnacion.jpg) |
+| Cédula de Xólotl | [Panel de entrada](evidencia/introduccion.jpg) |
 | Volumen y recorridos | [Axonometría sin cubierta](evidencia/axonometria.jpg) |
 | Acceso y circulación | [Entrada](evidencia/entrada.jpg) · [Procesión](evidencia/procesion.jpg) · [Regreso](evidencia/retorno.jpg) |
 
@@ -49,8 +56,8 @@ Desde la raíz del repositorio, con Lune 0.11.1, Blender 4.3 y Python con Pillow
 
 ```sh
 lune run colectividad/tools/export_preview.luau sala.json
-git show 7e3cd1c:colectividad/docs/evidencia/planta.png > planta-etapa3.png
-python3 colectividad/tools/draw_plan.py sala.json planta.png --compare planta-etapa3.png
+git show 63de9d5:colectividad/docs/evidencia/planta.png > planta-etapa4.png
+python3 colectividad/tools/draw_plan.py sala.json planta.png --compare planta-etapa4.png
 blender -b --factory-startup --python-exit-code 1 \
   --python colectividad/tools/render_preview.py -- sala.json originales renders
 ```
