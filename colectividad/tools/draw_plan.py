@@ -16,6 +16,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("scene", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--compare", type=Path, help="Planta de dos obras para componer la comparación")
     args = parser.parse_args()
     data = json.loads(args.scene.read_text())
     elements = data["parts"]
@@ -23,7 +24,7 @@ def main():
 
     paper, ink, secondary = "#f1eadd", "#202b2c", "#505854"
     earth, basalt, water = "#dfd0bb", "#303c3b", "#389b88"
-    amber, line = "#ae672d", "#a89a84"
+    amber, line, violet = "#ae672d", "#a89a84", "#633b87"
     image = Image.new("RGB", (1430, 1200), paper)
     draw = ImageDraw.Draw(image)
     draw.text((64, 56), "Colectividad Xoloitzcuintle", font=font(48, True), fill=ink)
@@ -59,15 +60,15 @@ def main():
         ("Piso continuo", earth), ("Muro lateral", basalt), ("Muro del umbral", basalt),
         ("Muro de la obra", basalt), ("Jamba", basalt), ("Panel de pizarra", "#948473"),
         ("Orilla", "#7a9a7a"), ("Agua", water), ("Paño de arcilla", "#a1582e"),
-        ("Marco", "#a1582e"), ("Obra", "#e49847"),
+        ("Paño de obsidiana", violet), ("Marco", "#a1582e"), ("Obra", "#e49847"),
         ("Placa", "#b78957"),
     ):
         for part in elements:
             if part["name"] == name:
                 polygon(part, color)
 
-    reading_area = (xy(14, 42), xy(19.4, 28))
-    draw.rectangle(reading_area, fill="#e7bc90", outline="#af692e", width=2)
+    draw.rectangle((xy(14, 42), xy(19.4, 28)), fill="#e7bc90", outline=amber, width=2)
+    draw.rectangle((xy(-19.4, 32), xy(-14, 18)), fill="#d9c6e9", outline=violet, width=2)
     for part in elements:
         if part["name"] == "Torso":
             x, _, z, *_ = part["transform"]
@@ -88,7 +89,8 @@ def main():
     for part in elements:
         if part["name"] == "Obra":
             x, _, z, *_ = part["transform"]
-            number(xy(x - 3 if x > 0 else x, z if x > 0 else z - 2.2), artwork_numbers[part["group"]])
+            tag = xy(x - math.copysign(3, x), z) if abs(x) > 10 else xy(x, z - 2.2)
+            number(tag, artwork_numbers[part["group"]])
         if "prompt" in part:
             px, _, pz = part["prompt"]
             x, y = xy(px, pz)
@@ -96,6 +98,8 @@ def main():
 
     arrow(xy(10.1, 34.5), xy(15.2, 34.5), "#ae672d", width=3, head=9)
     draw.text(xy(20, 25.8), "Lectura 002", font=font(15, True), fill=ink, anchor="rt")
+    arrow(xy(-10.1, 24.5), xy(-15.2, 24.5), violet, width=3, head=9)
+    draw.text(xy(-20, 16.6), "Lectura 003", font=font(15, True), fill=ink, anchor="lt")
 
     # Dimension lines sit outside the walkable plan.
     x1, top = xy(-22, 64)
@@ -120,11 +124,12 @@ def main():
         ("Orillas", "Dos franjas de paso libre de 6 studs.\nCruce transversal entre Z 49 y 58."),
         ("001 · Cauce del Itzcuintlan", "Muro del fondo · obra 9 × 9, frente −Z.\nCentro (0, 7.65, 62.25)."),
         ("002 · El calor de Huehueteotl", "Paño +X · obra 8 × 8, frente −X.\nCentro (20.35, 6.9, 37).\nLectura: X 14–19.4, Z 28–42."),
+        ("003 · Itztlantli en el nuevo mundo", "Paño −X · obra 8 × 8, frente +X.\nCentro (−20.35, 6.9, 23).\nLectura: X −19.4 a −14, Z 18–32."),
     ]
     for index, (heading, copy) in enumerate(notes):
-        y = 321 + index * 132
+        y = (301, 407, 513, 619, 725, 859)[index]
         draw.line((908, y - 12, 1363, y - 12), fill=line, width=1)
-        draw.text((909, y), heading, font=font(22, True), fill=amber)
+        draw.text((909, y), heading, font=font(22, True), fill=violet if index == 5 else amber)
         draw.multiline_text((909, y + 36), copy, font=font(19), fill=ink, spacing=7)
     draw.ellipse((909, 1012, 921, 1024), fill="#e49847", outline=ink, width=2)
     draw.text((933, 1007), "Prompt · Leer ficha", font=font(17), fill=ink)
@@ -133,6 +138,20 @@ def main():
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     image.save(args.output, optimize=True)
+    if args.compare:
+        prior = Image.open(args.compare).convert("RGB")
+        # Both plans use the same crop and native scale.
+        crop = (126, 220, 816, 1118)
+        comparison = Image.new("RGB", (1490, 1115), paper)
+        comparison.paste(prior.crop(crop), (30, 155))
+        comparison.paste(image.crop(crop), (770, 155))
+        captions = ImageDraw.Draw(comparison)
+        captions.text((64, 39), "Colectividad Xoloitzcuintle · dos y tres obras", font=font(43, True), fill=ink)
+        captions.text((66, 107), "Etapa 2 · Dos estaciones", font=font(26, True), fill=ink)
+        captions.text((806, 107), "Etapa 3 · Itztlantli en el paño −X", font=font(26, True), fill=violet)
+        captions.line((745, 107, 745, 1060), fill=line, width=2)
+        captions.text((66, 1068), "Misma escala y envolvente de 44 × 64 studs", font=font(20), fill=secondary)
+        comparison.save(args.output.with_name("comparativa.png"), optimize=True)
 
 
 if __name__ == "__main__":

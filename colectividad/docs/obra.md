@@ -1,6 +1,6 @@
 # Obras de Colectividad Xoloitzcuintle
 
-Dos obras digitales de **xolosArmy Network**, creadas el 13 de noviembre de 2026. Ambas son ediciones 1/1 minteadas como SLP NFT1 Child en eCash dentro de **xolosArmy Community**. Los NFT de linaje corresponden a **xolosArmy Official**. El [catálogo canónico](https://xolosarmy.xyz/blog/colectividad-xoloitzcuintle/catalogo.json) se conserva como [copia local para la sala](../src/shared/Catalogo.json) y alimenta las fichas Luau.
+Tres obras digitales de **xolosArmy Network**, creadas el 13 de noviembre de 2026. Las tres son ediciones 1/1 minteadas como SLP NFT1 Child en eCash dentro de **xolosArmy Community**. Los NFT de linaje corresponden a **xolosArmy Official**. El [catálogo canónico](https://xolosarmy.xyz/blog/colectividad-xoloitzcuintle/catalogo.json) se conserva como [copia local para la sala](../src/shared/Catalogo.json) y alimenta las fichas Luau.
 
 ## 001 · Cauce del Itzcuintlan
 
@@ -17,6 +17,14 @@ Los xoloitzcuintles se acurrucan en tres niveles sobre un petate y comparten su 
 - Token y minteo `ae430d802b9b2514f721f9305881bbdff03b7c8e3a495e3ad093fdf7b98e3b8f`, bloque 975396. [Token](https://explorer.xolosarmy.xyz/token/ae430d802b9b2514f721f9305881bbdff03b7c8e3a495e3ad093fdf7b98e3b8f) · [Minteo](https://explorer.xolosarmy.xyz/tx/ae430d802b9b2514f721f9305881bbdff03b7c8e3a495e3ad093fdf7b98e3b8f).
 - Anuncio Tonalli Memo TM1 `bfbd5d6cfb33cff43a71e886fe8ef4ba7068ea21231d5aec91682ad83e34af21`, bloque 975397. [Anuncio](https://explorer.xolosarmy.xyz/tx/bfbd5d6cfb33cff43a71e886fe8ef4ba7068ea21231d5aec91682ad83e34af21).
 - PNG original de 1254 × 1254 px. SHA-256 `3ea8f4235c393b867aad9c823e9401edbf8abd481812f26c65359e6a8f3b5e49`. [PNG](https://xolosarmy.xyz/assets/colectividad-xoloitzcuintle/el-calor-de-huehueteotl.png).
+
+## 003 · Itztlantli en el nuevo mundo
+
+La dentición incompleta de algunos xoloitzcuintles sin pelo dialoga con los filos de obsidiana del macuahuitl. El eclipse y los monolitos sitúan la analogía en un paisaje ritual imaginado. La escenografía de la sala usa un relieve abstracto de eclipse. [Ficha curatorial](https://xolosarmy.xyz/blog/colectividad-xoloitzcuintle/itztlantli-en-el-nuevo-mundo/).
+
+- Token y minteo `cedd28604d9ac60fcf47c4b81fe448312169cbebe61cb832abbfa0d8070b6564`, bloque 975399. [Token](https://explorer.xolosarmy.xyz/token/cedd28604d9ac60fcf47c4b81fe448312169cbebe61cb832abbfa0d8070b6564) · [Minteo](https://explorer.xolosarmy.xyz/tx/cedd28604d9ac60fcf47c4b81fe448312169cbebe61cb832abbfa0d8070b6564).
+- Anuncio Tonalli Memo TM1 `0d408720977f09b14ea15bd4c14b94d73cc62d5b2a1463967556b9e04af3b1af`, bloque 975401. [Anuncio](https://explorer.xolosarmy.xyz/tx/0d408720977f09b14ea15bd4c14b94d73cc62d5b2a1463967556b9e04af3b1af).
+- PNG original de 1254 × 1254 px. SHA-256 `038c80ab79380cbe37ac719930ba1b0677e2141cc6d9d68e8d2b5dab536b8f4e`. [PNG](https://xolosarmy.xyz/assets/colectividad-xoloitzcuintle/itztlantli-en-el-nuevo-mundo.png).
 
 Se verificó en el nodo que usa Xolos Explorer que los minteos pertenecen al grupo padre del catálogo y que cada anuncio contiene el ID de su obra. La ficha del visitante muestra Xolos Explorer y los identificadores completos. Roblox restringe los enlaces directos en la experiencia. La sala y las fichas están disponibles para cualquier visitante. [Política de Roblox](https://en.help.roblox.com/hc/en-us/articles/360000910966-Social-Media-Links-for-Experiences-Communities).
 
@@ -45,8 +53,8 @@ for item in catalog["items"]:
 PY
 ```
 
-1. Importa ambos PNG intactos como **Image** con una cuenta autorizada para administrar assets del universo de prueba. Usa Asset Manager o Importer de Studio. [Importador de Studio](https://create.roblox.com/docs/studio/importer).
+1. Importa los tres PNG intactos como **Image** con una cuenta autorizada para administrar assets del universo de prueba. Usa Asset Manager o Importer de Studio. [Importador de Studio](https://create.roblox.com/docs/studio/importer).
 2. Tras la moderación, comprueba los permisos del universo de prueba. Configura el ID de contenido **Image** de cada pieza en `ImageIds` de `src/server/Settings.luau` bajo la clave de su slug. Si partiste de un Decal, verifica el ID de la textura. [Moderación de assets](https://en.help.roblox.com/hc/en-us/articles/21416271342868-Content-Moderation-on-Roblox).
-3. En Play, verifica con una cuenta visitante que ambos originales cargan con ajuste **Fit**, muestran sus cuatro esquinas y conservan la atribución. Roblox procesa su propia copia para servirla en el motor. Conserva el PNG fuente verificado como referencia.
+3. En Play, verifica con una cuenta visitante que los tres originales cargan con ajuste **Fit**, muestran sus cuatro esquinas y conservan la atribución. Roblox procesa su propia copia para servirla en el motor. Conserva el PNG fuente verificado como referencia.
 
-Ambos marcos muestran un aviso mientras estén pendientes los IDs autorizados. Las placas y las fichas están disponibles durante la prueba local.
+Los tres marcos muestran un aviso mientras estén pendientes los IDs autorizados. Las placas y las fichas están disponibles durante la prueba local.

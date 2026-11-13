@@ -94,8 +94,13 @@ local works = {
 		"bfbd5d6cfb33cff43a71e886fe8ef4ba7068ea21231d5aec91682ad83e34af21",
 		r.Vector3.new(20.35, 6.9, 37), -r.Vector3.xAxis, 8, 7, r.Vector3.new(20.28, 4.6, 30.05),
 	},
+	["itztlantli-en-el-nuevo-mundo"] = {
+		"Itztlantli en el nuevo mundo", "cedd28604d9ac60fcf47c4b81fe448312169cbebe61cb832abbfa0d8070b6564",
+		"0d408720977f09b14ea15bd4c14b94d73cc62d5b2a1463967556b9e04af3b1af",
+		r.Vector3.new(-20.35, 6.9, 23), r.Vector3.xAxis, 8, 7, r.Vector3.new(-20.28, 4.6, 30.15),
+	},
 }
-assert(#catalog.items == 2)
+assert(#catalog.items == 3)
 for _, item in catalog.items do
 	local expected = assert(works[item.slug])
 	local artwork = artworks[item.slug]
@@ -116,7 +121,7 @@ local function verifyRoom(built, threshold)
 	assert(#geometry.Procesion:GetChildren() == 5)
 	assert(#findAll(geometry, "PointLight") == 10)
 	assert(#findAll(geometry, "ParticleEmitter") == 0)
-	assert(#findAll(built, "BasePart") <= 380)
+	assert(#findAll(built, "BasePart") <= 410)
 	local floor = geometry.Envolvente["Piso continuo"]
 	assert(floor.CanCollide and floor.Size == r.Vector3.new(44, 1, 64))
 	local center = threshold:PointToObjectSpace(floor.CFrame.Position)
@@ -135,11 +140,13 @@ local function verifyRoom(built, threshold)
 				or position.Z - solid.Size.Z / 2 >= 62.999)
 		end
 	end
+	local directory = geometry.Envolvente["Directorio de obras"]
+	assert(not directory.CanCollide and directory.Senal.Texto.Text:find("003  Itztlantli", 1, true))
+	assert(threshold:PointToObjectSpace(directory.CFrame.Position).Y - directory.Size.Y / 2 > 10)
 	local exhibits = built.Exhibidores
 	local promptPositions = {}
-	local combinedPromptRange = 0
-	assert(#exhibits:GetChildren() == 2 and #findAll(exhibits, "ProximityPrompt") == 2)
-	assert(#findAll(exhibits, "SurfaceLight") == 2 and #findAll(exhibits, "ParticleEmitter") == 0)
+	assert(#exhibits:GetChildren() == 3 and #findAll(exhibits, "ProximityPrompt") == 3)
+	assert(#findAll(exhibits, "SurfaceLight") == 3 and #findAll(exhibits, "ParticleEmitter") == 0)
 	for slug, expected in works do
 		local exhibit = exhibits[slug]
 		local art = exhibit.Obra
@@ -148,8 +155,11 @@ local function verifyRoom(built, threshold)
 		assert(plaque.Ficha.Titulo.Text == expected[1] and plaque.Ficha.Edicion.Text:find("1/1", 1, true))
 		assert(prompt.ObjectText == expected[1] and prompt.MaxActivationDistance == expected[7] and prompt.RequiresLineOfSight)
 		assert(prompt:GetAttribute(constants.artworkAttribute) == slug)
-		table.insert(promptPositions, plaque.CFrame:PointToWorldSpace(prompt.Parent.Position))
-		combinedPromptRange += prompt.MaxActivationDistance
+		local position = plaque.CFrame:PointToWorldSpace(prompt.Parent.Position)
+		for _, other in promptPositions do
+			assert((position - other.position).Magnitude > prompt.MaxActivationDistance + other.range)
+		end
+		table.insert(promptPositions, { position = position, range = prompt.MaxActivationDistance })
 		assert(art.Size.X == art.Size.Y and art.Size.X == expected[6] and art.Obra.Face == r.Enum.NormalId.Front)
 		assert((threshold:PointToObjectSpace(art.CFrame.Position) - expected[4]).Magnitude < 0.001)
 		assert(near(threshold:VectorToObjectSpace(art.CFrame.LookVector):Dot(expected[5]), 1))
@@ -159,23 +169,30 @@ local function verifyRoom(built, threshold)
 		assert(art.Obra:FindFirstChild("Imagen") == nil)
 	end
 
-	assert((promptPositions[1] - promptPositions[2]).Magnitude > combinedPromptRange)
-
+	local sideExhibits = {
+		{ slug = "el-calor-de-huehueteotl", side = 1, z = 30.05 },
+		{ slug = "itztlantli-en-el-nuevo-mundo", side = -1, z = 30.15 },
+	}
+	for _, station in sideExhibits do
+		local exhibit = exhibits[station.slug]
+		for _, piece in findAll(exhibit, "BasePart") do
+			local localFrame = threshold:ToObjectSpace(piece.CFrame)
+			local half = piece.Size / 2
+			local xExtent = math.abs(localFrame.XVector.X) * half.X + math.abs(localFrame.YVector.X) * half.Y
+				+ math.abs(localFrame.ZVector.X) * half.Z
+			-- Both wall assemblies sit behind the reading strips and walking corridors.
+			assert(localFrame.X * station.side - xExtent > 19.4 and not piece.CanCollide and not piece.CanTouch)
+		end
+		local plaque = exhibit.Placa
+		local promptOrigin = plaque.CFrame:PointToWorldSpace(plaque.PuntoDeLectura.Position)
+		local reader = threshold:PointToWorldSpace(r.Vector3.new(station.side * 15, 4, station.z))
+		assert((reader - promptOrigin).Magnitude < plaque.PuntoDeLectura[constants.promptName].MaxActivationDistance)
+	end
 	local hearth = exhibits["el-calor-de-huehueteotl"]
 	assert(hearth:FindFirstChild("Petate") and hearth:FindFirstChild("Fuego simbólico"))
-	for _, piece in findAll(hearth, "BasePart") do
-		local localFrame = threshold:ToObjectSpace(piece.CFrame)
-		local half = piece.Size / 2
-		local xExtent = math.abs(localFrame.XVector.X) * half.X + math.abs(localFrame.YVector.X) * half.Y
-			+ math.abs(localFrame.ZVector.X) * half.Z
-		-- Keep the full +X path (X 7–13) and its adjacent reading area clear of mounted parts.
-		assert(localFrame.X - xExtent > 19.4 and not piece.CanCollide and not piece.CanTouch)
-	end
-	local plaque = hearth.Placa
-	local promptOrigin = plaque.CFrame:PointToWorldSpace(plaque.PuntoDeLectura.Position)
-	local reader = threshold:PointToWorldSpace(r.Vector3.new(15, 4, 30.05))
-	assert((reader - promptOrigin).Magnitude < plaque.PuntoDeLectura[constants.promptName].MaxActivationDistance)
-
+	local eclipse = exhibits["itztlantli-en-el-nuevo-mundo"]
+	assert(eclipse["Corona del eclipse"].Shape == r.Enum.PartType.Cylinder)
+	assert(eclipse["Sombra del eclipse"].Shape == r.Enum.PartType.Cylinder)
 end
 
 local demo = room.install(settings, true)
@@ -231,7 +248,7 @@ levelFloor = true
 obstructed = true
 rejects(function() room.install(reviewed, false) end, "volumen reservado")
 obstructed = false
-reviewed.ImageIds["el-calor-de-huehueteotl"] = "https://example.invalid/imagen.png"
+reviewed.ImageIds["itztlantli-en-el-nuevo-mundo"] = "https://example.invalid/imagen.png"
 rejects(function() room.install(reviewed, false) end, "ID de imagen inválido")
 assert(workspace:FindFirstChild(constants.roomName) == nil)
 reviewed.ImageIds = {}
@@ -328,28 +345,29 @@ for slug in works do
 end
 local cauce = "cauce-del-itzcuintlan"
 local calor = "el-calor-de-huehueteotl"
+local itztlantli = "itztlantli-en-el-nuevo-mundo"
 promptTriggered:emit(prompts[calor], {})
 assert(not gui.Enabled and bindings == 0)
 local foreign = part(hall, "ProximityPrompt", constants.promptName)
 foreign:SetAttribute(constants.artworkAttribute, calor)
 promptTriggered:emit(foreign, player)
 assert(not gui.Enabled and bindings == 0)
-for _, slug in { cauce, calor, cauce } do
+for _, slug in { cauce, itztlantli, calor, itztlantli, cauce } do
 	promptTriggered:emit(prompts[slug], player)
 	local expected = works[slug]
 	assert(gui.Enabled and scroller.Obra.Text == expected[1] and scroller.Edicion.Text:find("1/1", 1, true))
 	assert(scroller.Token.Text == expected[2] and scroller.Anuncio.Text == expected[3])
 	assert(scroller.Explorador.Text == "Xolos Explorer" and bindings == 1)
 end
-prompts[calor]:SetAttribute(constants.artworkAttribute, cauce)
-promptTriggered:emit(prompts[calor], player)
+prompts[itztlantli]:SetAttribute(constants.artworkAttribute, cauce)
+promptTriggered:emit(prompts[itztlantli], player)
 assert(scroller.Obra.Text == works[cauce][1] and bindings == 1)
 activated:emit()
 assert(not gui.Enabled and bindings == 0)
-promptTriggered:emit(prompts[calor], player)
+promptTriggered:emit(prompts[itztlantli], player)
 assert(not gui.Enabled and bindings == 0)
-prompts[calor]:SetAttribute(constants.artworkAttribute, calor)
-promptTriggered:emit(prompts[calor], player)
+prompts[itztlantli]:SetAttribute(constants.artworkAttribute, itztlantli)
+promptTriggered:emit(prompts[itztlantli], player)
 player.CharacterRemoving:emit()
 assert(not gui.Enabled and bindings == 0)
 print("OK: fichas correctas al alternar obras, aislamiento de prompts y una sola GUI y suscripción")
@@ -360,7 +378,10 @@ if process.args[1] then
 	assert(bootstrap:IsA("Script") and bootstrap:GetAttribute("Demo") == true)
 	local sharedPackage = demoPlace.ReplicatedStorage.ColectividadXoloitzcuintle
 	assert(sharedPackage.Artworks:IsA("ModuleScript"))
-	assert(sharedPackage.Catalogo:IsA("ModuleScript") and sharedPackage.Catalogo.Source:find(works["el-calor-de-huehueteotl"][2], 1, true))
+	assert(sharedPackage.Catalogo:IsA("ModuleScript"))
+	for _, work in works do
+		assert(sharedPackage.Catalogo.Source:find(work[2], 1, true))
+	end
 	assert(demoPlace.StarterPlayer.StarterPlayerScripts.ColectividadXoloitzcuintle.Exhibit:IsA("LocalScript"))
 	print("OK: artefacto Rojo y atributo de maqueta")
 end

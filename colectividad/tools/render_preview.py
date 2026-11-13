@@ -15,7 +15,7 @@ def arguments():
     parser.add_argument("scene", type=Path)
     parser.add_argument("originals", type=Path, help="Directory with the original PNGs, named by slug")
     parser.add_argument("output", type=Path)
-    parser.add_argument("--views", nargs="+", default=["entrada", "procesion", "obra", "huehueteotl", "ambas", "retorno", "axonometria"])
+    parser.add_argument("--views", nargs="+", default=["entrada", "procesion", "obra", "huehueteotl", "itztlantli", "tres-estaciones", "retorno", "axonometria"])
     return parser.parse_args(sys.argv[sys.argv.index("--") + 1 :])
 
 
@@ -71,6 +71,11 @@ def create_part(part, materials):
     if shape == "Ball":
         bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=10, radius=0.5)
         obj = bpy.context.object
+    elif shape == "Cylinder":
+        bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.5, depth=1)
+        obj = bpy.context.object
+        bpy.ops.transform.rotate(value=math.pi / 2, orient_axis="Y")
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
     elif shape == "Wedge":
         vertices = [
             (-0.5, -0.5, -0.5), (0.5, -0.5, -0.5),
@@ -195,10 +200,15 @@ def main(args):
                 back = sign["face"] == "Back"
                 sign_text("Rótulo", sign["labels"][0]["text"], 0.48 if back else 0.65, frame,
                           (0, 0, (1 if back else -1) * (depth / 2 + 0.014)), text, back)
+        elif part["name"] == "Directorio de obras":
+            for label in part["signs"][0]["labels"]:
+                y = part["size"][1] * (0.5 - label["y"] - label["h"] / 2)
+                sign_text("Directorio", label["text"], 0.44, frame,
+                          (0, y, -part["size"][2] / 2 - 0.014), text)
         elif part["name"] == "Placa":
             w, h, depth = part["size"]
             for label in part["signs"][0]["labels"]:
-                copy = label["text"].replace(" del Valle", "\ndel Valle").replace(" y el abrigo", "\ny el abrigo")
+                copy = label["text"].replace(" del Valle", "\ndel Valle").replace(" y el abrigo", "\ny el abrigo").replace(" y un mundo", "\ny un mundo")
                 y = h * (0.5 - label["y"] - label["h"] / 2)
                 sign_text("Placa · atribución", copy, 0.22, frame,
                           (0, y, -depth / 2 - 0.014), text)
@@ -208,6 +218,7 @@ def main(args):
             area("Luz local cálida", (side * 10.5, 13.75, z), (side * 6, 0, z), 1100, 5.5, (1, 0.74, 0.48))
     area("Luz del marco", (0, 12.3, 60.5), (0, 5, 62), 460, 4.4, (1, 0.87, 0.70))
     area("Luz del petate", (18.1, 10.7, 36.5), (20, 2.4, 36.5), 530, 4, (1, 0.61, 0.30))
+    area("Luz violeta del eclipse", (-18.1, 10.65, 23.0), (-20, 4.1, 22.6), 580, 4, (0.61, 0.40, 1.0))
     area("Luz rasante del cauce", (0, 11.6, 29), (0, 0, 31), 780, 12, (0.62, 0.86, 0.89))
     area("Luz del acceso", (0, 9, -5), (0, 7, 1), 540, 7, (1, 0.8, 0.63))
 
@@ -220,7 +231,8 @@ def main(args):
         "procesion": ((-10, 6.1, 8), (0, 3.4, 29), 23),
         "obra": ((1.25, 5.65, 44), (2, 7.3, 62), 29),
         "huehueteotl": ((3.5, 5.5, 32.2), (20, 6.5, 36.6), 27),
-        "ambas": ((-13, 6.6, 25), (10, 5.9, 46.5), 21),
+        "itztlantli": ((-4.0, 5.5, 23.4), (-20, 6.1, 23.5), 25),
+        "tres-estaciones": ((0, 6.2, 1.25), (0, 6.0, 52), 13),
         "retorno": ((9.5, 5.65, 47), (0, 6.3, 0), 24),
     }
     for name, parameters in views.items():
@@ -232,7 +244,7 @@ def main(args):
         area("Luz general de maqueta", (0, 54, 20), (0, 0, 30), 16000, 48, (0.90, 0.95, 1))
         camera.data.type = "ORTHO"
         camera.data.ortho_scale = 95
-        view(scene, camera, args.output / "axonometria.png", (-58, 109, -31), (0, 7, 32), 40, 1200, 880)
+        view(scene, camera, args.output / "axonometria.png", (-48, 95, -37), (0, 6, 32), 40, 1150, 1000)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,10 @@ local interpretation = {
 		plaque = "El petate, el fuego y el abrigo compartido",
 		summary = "Sobre un petate, los xoloitzcuintles se acurrucan en tres niveles y comparten su calor. El brasero de Huehuetéotl evoca un fuego que la comunidad resguarda. La escena propone una lectura contemporánea del abrigo colectivo.",
 	},
+	["itztlantli-en-el-nuevo-mundo"] = {
+		plaque = "Dentición del xolo, obsidiana y eclipse",
+		summary = "La obra traza una analogía artística entre la dentición incompleta de algunos xoloitzcuintles sin pelo y los filos de obsidiana del macuahuitl. El eclipse enmarca esa relación en una escenografía ritual imaginada para un mundo nuevo.",
+	},
 }
 
 local months = {

@@ -111,6 +111,10 @@ local function buildShell(parent, root, demo)
 			localLight(fixture, Color3.fromRGB(255, 211, 161), 20, 0.95)
 		end
 	end
+	local directory = part(shell, "Directorio de obras", Vector3.new(13, 2.35, 0.30),
+		root * CFrame.new(0, 12.8, 15), stone.obsidian, Enum.Material.SmoothPlastic)
+	surfaceSign(directory, Enum.NormalId.Front,
+		"←  002  El calor de Huehueteotl\n↑  001  Cauce del Itzcuintlan\n→  003  Itztlantli en el nuevo mundo", 27)
 end
 
 local function buildRiver(parent, root)
@@ -181,8 +185,8 @@ local function buildReliefs(parent, root)
 	local reliefs = group(parent, "Relieves del valle")
 	for _, side in ipairs({-1, 1}) do
 		for bay, z in ipairs({11, 23, 37, 51}) do
-			if side == 1 and z == 37 then
-				continue -- This wall bay houses El calor de Huehueteotl.
+			if (side == 1 and z == 37) or (side == -1 and z == 23) then
+				continue -- These wall bays house the two lateral exhibits.
 			end
 			local panel = root * CFrame.new(side * 20.65, 4.4, z)
 			part(reliefs, "Panel de pizarra", Vector3.new(0.32, 7.2, 9.6), panel,

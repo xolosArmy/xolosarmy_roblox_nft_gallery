@@ -88,6 +88,31 @@ local function buildHearth(exhibit, frame)
 	end
 end
 
+local function buildEclipse(exhibit, frame)
+	local backdrop = Color3.fromRGB(48, 34, 61)
+	local violet = Color3.fromRGB(122, 91, 160)
+	local darkViolet = Color3.fromRGB(72, 53, 91)
+
+	panelPart(exhibit, "Paño de obsidiana", frame * CFrame.new(0, 0, 0.48),
+		Vector3.new(10.6, 11.6, 0.26), backdrop)
+
+	local eclipse = frame * CFrame.new(-6.05, 0, 0.12)
+	local axis = CFrame.Angles(0, math.pi / 2, 0)
+	local corona = panelPart(exhibit, "Corona del eclipse", eclipse * axis,
+		Vector3.new(0.16, 2, 2), violet)
+	corona.Shape = Enum.PartType.Cylinder
+	corona.Material = Enum.Material.SmoothPlastic
+	local shadow = panelPart(exhibit, "Sombra del eclipse", eclipse * CFrame.new(0.16, 0.12, -0.09) * axis,
+		Vector3.new(0.16, 1.65, 1.65), obsidian)
+	shadow.Shape = Enum.PartType.Cylinder
+
+	for step = -4, 4 do
+		local y = -4.65 - (math.abs(step) % 3) * 0.24
+		panelPart(exhibit, "Trama de obsidiana", frame * CFrame.new(step * 0.9, y, 0.24),
+			Vector3.new(0.9, 0.24, 0.18), if step % 3 == 0 then violet else darkViolet)
+	end
+end
+
 local slots = {
 	{
 		artworkId = "cauce-del-itzcuintlan",
@@ -108,6 +133,18 @@ local slots = {
 		lightColor = Color3.fromRGB(255, 174, 108),
 		decorate = buildHearth,
 	},
+	{
+		artworkId = "itztlantli-en-el-nuevo-mundo",
+		artFrame = CFrame.new(-20.35, 6.9, 23) * CFrame.Angles(0, -math.pi / 2, 0),
+		plaqueFrame = CFrame.new(-20.28, 4.6, 30.15) * CFrame.Angles(0, -math.pi / 2, 0),
+		artSize = 8,
+		plaqueWidth = 3.8,
+		plaqueTitleSize = 30,
+		promptRange = 7,
+		lightColor = Color3.fromRGB(174, 133, 237),
+		accent = Color3.fromRGB(208, 177, 244),
+		decorate = buildEclipse,
+	},
 }
 
 local function buildSlot(parent, threshold, slot, artwork, contentId)
@@ -117,11 +154,12 @@ local function buildSlot(parent, threshold, slot, artwork, contentId)
 	exhibit.Parent = parent
 
 	local frame = threshold * slot.artFrame
+	local accent = slot.accent or amber
 	local edge = slot.artSize + 0.6
 	panelPart(exhibit, "Marco", frame * CFrame.new(0, 0, 0.25), Vector3.new(edge, edge, 0.35), basalt)
 	local art = panelPart(exhibit, "Obra", frame, Vector3.new(slot.artSize, slot.artSize, 0.2), obsidian)
 	local artCanvas = canvas(art, "Obra", Vector2.new(900, 900))
-	local placeholder = label(artCanvas, "Estado", "Imagen pendiente\nde autorización en Roblox", UDim2.fromScale(0.1, 0.25), UDim2.fromScale(0.8, 0.5), 49, amber, true)
+	local placeholder = label(artCanvas, "Estado", "Imagen pendiente\nde autorización en Roblox", UDim2.fromScale(0.1, 0.25), UDim2.fromScale(0.8, 0.5), 49, accent, true)
 	if contentId then
 		-- The label stays behind the texture while the asset loads.
 		local image = Instance.new("ImageLabel")
@@ -139,8 +177,8 @@ local function buildSlot(parent, threshold, slot, artwork, contentId)
 
 	local plaque = panelPart(exhibit, "Placa", threshold * slot.plaqueFrame, Vector3.new(slot.plaqueWidth, 3.15, 0.22), basalt)
 	local plaqueCanvas = canvas(plaque, "Ficha", Vector2.new(slot.plaqueWidth * 100, 315))
-	label(plaqueCanvas, "Titulo", artwork.title, UDim2.fromScale(0.06, 0.08), UDim2.fromScale(0.88, 0.24), 35, parchment)
-	label(plaqueCanvas, "Edicion", "Edición " .. artwork.edition .. " · xolosArmy Network", UDim2.fromScale(0.06, 0.33), UDim2.fromScale(0.88, 0.21), 24, amber)
+	label(plaqueCanvas, "Titulo", artwork.title, UDim2.fromScale(0.06, 0.08), UDim2.fromScale(0.88, 0.24), slot.plaqueTitleSize or 35, parchment)
+	label(plaqueCanvas, "Edicion", "Edición " .. artwork.edition .. " · xolosArmy Network", UDim2.fromScale(0.06, 0.33), UDim2.fromScale(0.88, 0.21), 24, accent)
 	label(plaqueCanvas, "Lectura", artwork.plaque, UDim2.fromScale(0.06, 0.56), UDim2.fromScale(0.88, 0.31), 27, parchment)
 
 	local promptOrigin = Instance.new("Attachment")
@@ -158,7 +196,7 @@ local function buildSlot(parent, threshold, slot, artwork, contentId)
 	prompt:SetAttribute(constants.artworkAttribute, slot.artworkId)
 	prompt.Parent = promptOrigin
 
-	local lamp = panelPart(exhibit, "Iluminacion", frame * CFrame.new(0, slot.artSize / 2 + 0.6, -0.6), Vector3.new(4.5, 0.24, 0.52), amber)
+	local lamp = panelPart(exhibit, "Iluminacion", frame * CFrame.new(0, slot.artSize / 2 + 0.6, -0.6), Vector3.new(4.5, 0.24, 0.52), accent)
 	lamp.Material = Enum.Material.Metal
 	local light = Instance.new("SurfaceLight")
 	light.Face = Enum.NormalId.Bottom
