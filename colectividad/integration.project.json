@@ -1,0 +1,26 @@
+{
+  "name": "Colectividad - integración parcial",
+  "tree": {
+    "$className": "DataModel",
+    "$ignoreUnknownInstances": true,
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+      "ColectividadXoloitzcuintle": { "$path": "src/shared", "$ignoreUnknownInstances": true }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$ignoreUnknownInstances": true,
+      "ColectividadXoloitzcuintle": { "$path": "src/server", "$ignoreUnknownInstances": true }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "$ignoreUnknownInstances": true,
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$ignoreUnknownInstances": true,
+        "ColectividadXoloitzcuintle": { "$path": "src/client", "$ignoreUnknownInstances": true }
+      }
+    }
+  }
+}

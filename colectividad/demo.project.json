@@ -1,0 +1,34 @@
+{
+  "name": "Colectividad - demo aislada",
+  "tree": {
+    "$className": "DataModel",
+    "$ignoreUnknownInstances": true,
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+      "ColectividadXoloitzcuintle": { "$path": "src/shared", "$ignoreUnknownInstances": true }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$ignoreUnknownInstances": true,
+      "ColectividadXoloitzcuintle": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true,
+        "Bootstrap": { "$path": "src/server/Bootstrap.server.luau", "$properties": { "Attributes": { "Demo": { "Bool": true } } } },
+        "Settings": { "$path": "src/server/Settings.luau" },
+        "Room": { "$path": "src/server/Room.luau" },
+        "Displays": { "$path": "src/server/Displays.luau" },
+        "Geometry": { "$path": "src/server/Geometry.luau" }
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "$ignoreUnknownInstances": true,
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$ignoreUnknownInstances": true,
+        "ColectividadXoloitzcuintle": { "$path": "src/client", "$ignoreUnknownInstances": true }
+      }
+    }
+  }
+}

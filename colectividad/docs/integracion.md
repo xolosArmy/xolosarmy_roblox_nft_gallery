@@ -1,0 +1,27 @@
+# Inventario e integración en Studio
+
+## Inventario disponible
+
+Se inspeccionó `main` en `dc59bcf929c8fb05e056deec5c752a6da4ca0ea6`, el historial y el issue. El repositorio tiene generadores antiguos y un LocalScript. La búsqueda en el repositorio y en fuentes públicas no permitió confirmar Place ID, Universe ID o ubicación del Museo del Itzcuintlan. El entorno Debian carece de una sesión de Studio y de un archivo del Place. El estado publicado, la ubicación real de los modelos y sus accesos siguen pendientes de verificación. [Requisitos oficiales de Studio](https://create.roblox.com/docs/studio/setup).
+
+| Referencia histórica | Estructura y accesos declarados en la fuente |
+| --- | --- |
+| `gallery.lua` | `Workspace.XolosArmyPyramidGallery` contiene la pirámide, cuatro exhibidores con prompts y `GuideNPC`. El pad exterior vive directamente en Workspace y mueve avatares al interior. Las piezas están ancladas y conservan la colisión por defecto. El script modifica la iluminación global y usa `ShowNFTInfo`. |
+| `SalaDeLosEspiritus` | Submodelo de la pirámide. Corredor de 6 × 20 studs y cámara de 20 × 24 con altar, humo, velas y sonido. El generador crea un muro al comienzo de la cámara, sin hueco explícito. Revisar su conexión real en Studio. |
+| `tenochtitlan.lua` | `Workspace.TenochtitlanExpansion` declara una plaza, dos canales, `InteractiveMuseum`, `ArtGallery` y `XoloKennel`. `InteractiveMuseum` tiene una plataforma de 40 × 30 centrada en (60, 0, 0) y un artefacto con prompt. `XoloDog` es una pieza no anclada. Usa `ShowMuseumInfo` y `ShowKennelInfo`. |
+| `starterplayerscript_localscript.lua` | Crea `NFTGui` y usa esos tres eventos. Su lógica de enlaces e interacciones pertenece al recorrido histórico. |
+
+El diff agrega un paquete independiente. Conserva los archivos, modelos, pads, NPC, remotos e iluminación de la experiencia previa. El museo del Place real necesita su propio inventario. `InteractiveMuseum` es solamente un indicio histórico.
+
+## Preparar una copia de prueba
+
+1. En Creator Hub identifica el universo y el Place concretos del museo. Registra sus IDs, propietario, versión publicada y fecha. En Studio verifica nombres y jerarquía en Explorer tanto en edición como en Play, incluyendo modelos creados al iniciar. Guarda un respaldo local del Place fuente, con su versión y fecha, y conserva una copia intacta. Trabaja en una copia privada de prueba con IDs diferentes del museo publicado. [Archivos de Place](https://create.roblox.com/docs/projects/place-files).
+2. Recorre los accesos, NPC, colisiones, saltos, spawns, teletransportes y rutas de regreso. Selecciona un borde de piso ya accesible con una abertura de al menos 12 studs de ancho × 10 de alto. Reserva, desde ese borde, el prisma local X −22…22, Y −1…16, Z 0…64. Inspecciona todo ese volumen, incluido Terrain y contenido generado durante Play, y confirma continuidad de piso, giro de cámara y acceso al umbral desde la ruta del museo. Usa otra abertura si el lugar requiere cortar un muro existente.
+3. En un `BasePart` anclado del modelo verificado, crea un `Attachment` llamado `ColectividadThreshold`. Su `WorldCFrame` representa el centro del umbral a nivel del piso terminado. +Y es arriba y +Z entra a la sala. En Roblox, `LookVector` apunta en −Z. Si el museo se instancia al iniciar, instala el Attachment en su fuente o plantilla de la copia y ejecuta el arranque de la sala cuando esa geometría ya exista. La validación se realiza sobre el estado del mundo al llamar a `Room.install`.
+4. Configura `src/server/Settings.luau` en una copia local del proyecto. Usa los IDs de prueba en `TestPlaceId` y `TestUniverseId`, la ruta exacta por nombres desde Workspace en `AnchorModelPath` y el marco mundial medido en `ExpectedThresholdCFrame`. En la Command Bar de Studio, con el Attachment seleccionado, puedes registrar sus componentes con `print(game.Selection:Get()[1].WorldCFrame:GetComponents())` y construir `CFrame.new(...)` con esos doce valores. Activa `ReviewedClearance` tras la inspección. Para un asset autorizado, completa también `ImageIds`.
+5. Confirma que las carpetas `ColectividadXoloitzcuintle` estén libres en `ReplicatedStorage`, `ServerScriptService` y `StarterPlayer.StarterPlayerScripts`. Desde la raíz ejecuta `rojo serve colectividad/integration.project.json` y conecta el plugin de Rojo exclusivamente en la copia de prueba. Inspecciona el cambio propuesto antes de sincronizar. El proyecto omite Workspace y preserva instancias desconocidas. Construye la maqueta separada con `demo.project.json`. [Formato de proyecto Rojo](https://rojo.space/docs/v7/project-format/).
+6. Ejecuta las pruebas en Studio con Output abierto. En una copia abierta con IDs válidos, el generador verifica el Attachment único, su posición y giro, seis muestras del piso de llegada y los volúmenes de acceso y sala mediante consultas de colisión. La inspección manual cubre Terrain, partes no colisionables, interacciones heredadas y rutas completas. La sala se publica en Workspace como un solo modelo una vez construida.
+
+## Reversión
+
+Detén Play y desconecta Rojo. Retira las tres carpetas nuevas de la copia y el Attachment `ColectividadThreshold` que se creó para ella. Reinicia la sesión para limpiar el modelo generado y la GUI. Si la copia contiene otros cambios durante las pruebas, conserva esa versión y vuelve al respaldo local verificado para comparar. Registra la versión del Place fuente en la revisión del PR.
