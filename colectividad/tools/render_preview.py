@@ -4,7 +4,6 @@ import hashlib
 import json
 import math
 import sys
-import textwrap
 from pathlib import Path
 
 import bpy
@@ -17,6 +16,11 @@ def arguments():
     parser.add_argument("originals", type=Path, help="Directory with the original PNGs, named by slug")
     parser.add_argument("output", type=Path)
     parser.add_argument("--views", nargs="+", default=["entrada", "procesion", "obra", "huehueteotl", "itztlantli", "tonalli", "encarnacion", "introduccion", "cinco-estaciones", "retorno", "axonometria"])
+    font_directory = Path("/usr/share/fonts/truetype/lato")
+    parser.add_argument("--font", type=Path, default=font_directory / "Lato-Medium.ttf",
+                        help="Typeface used to approximate Gotham Medium")
+    parser.add_argument("--bold-font", type=Path, default=font_directory / "Lato-Bold.ttf",
+                        help="Typeface used to approximate Gotham Bold")
     return parser.parse_args(sys.argv[sys.argv.index("--") + 1 :])
 
 
@@ -104,22 +108,129 @@ def create_part(part, materials):
     return obj, frame
 
 
-def sign_text(name, body, size, frame, position, color, back=False):
-    curve = bpy.data.curves.new(name, "FONT")
+def text_material(rgb):
+    material = bpy.data.materials.new("Texto de SurfaceGui")
+    material.use_nodes = True
+    nodes = material.node_tree.nodes
+    nodes.clear()
+    emission = nodes.new("ShaderNodeEmission")
+    emission.inputs["Color"].default_value = (*rgb_linear(rgb), 1)
+    output = nodes.new("ShaderNodeOutputMaterial")
+    material.node_tree.links.new(emission.outputs[0], output.inputs["Surface"])
+    return material
+
+
+def sign_frame(part_frame, size, face):
+    # The columns of the rotation are the reader's right, up and outward.
+    normals = {
+        "Front": (0, 0, -1), "Back": (0, 0, 1),
+        "Left": (-1, 0, 0), "Right": (1, 0, 0),
+        "Top": (0, 1, 0), "Bottom": (0, -1, 0),
+    }
+    outward = Vector(normals[face])
+    up = Vector({"Top": (0, 0, 1), "Bottom": (0, 0, -1)}.get(face, (0, 1, 0)))
+    right = up.cross(outward)
+    dimensions = Vector(size)
+    width, height, depth = (
+        dimensions.dot(Vector(tuple(abs(axis) for axis in direction)))
+        for direction in (right, up, outward)
+    )
+    rotation = Matrix((right, up, outward)).transposed().to_4x4()
+    rotation.translation = outward * (depth / 2 + 0.014)
+    return part_frame @ rotation, width, height
+
+
+def resolve_box(udim, canvas):
+    x_scale, y_scale, x_offset, y_offset = udim
+    return Vector((x_scale * canvas[0] + x_offset, y_scale * canvas[1] + y_offset))
+
+
+def line_bounds(curve, probe, body):
     curve.body = body
+    bpy.context.view_layer.update()
+    return probe.bound_box[0][0], probe.bound_box[6][0]
+
+
+def wrap_lines(body, width, measure):
+    for paragraph in body.split("\n"):
+        line = ""
+        for word in paragraph.split():
+            candidate = f"{line} {word}" if line else word
+            if measure(candidate) <= width:
+                line = candidate
+                continue
+            if line:
+                yield line
+                line = ""
+            if measure(word) <= width:
+                line = word
+                continue
+            for letter in word:
+                candidate = line + letter
+                if line and measure(candidate) > width:
+                    yield line
+                    line = letter
+                else:
+                    line = candidate
+        yield line
+
+
+def create_label(label, frame, canvas, font, material):
+    size = label["textSize"]
+    box = resolve_box(label["boxSize"], canvas)
+    x, y = resolve_box(label["position"], canvas)
+    x -= label["anchor"][0] * box.x
+    y -= label["anchor"][1] * box.y
+    curve = bpy.data.curves.new(label["name"], "FONT")
+    curve.font = font
     curve.size = size
-    curve.align_x = "CENTER"
-    curve.align_y = "CENTER"
-    font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-    if font_path.exists():
-        curve.font = bpy.data.fonts.get("DejaVu Sans") or bpy.data.fonts.load(str(font_path))
-    curve.materials.append(color)
-    obj = bpy.data.objects.new(name, curve)
-    bpy.context.collection.objects.link(obj)
-    # Blender text faces local +Z. Rotate it toward the artwork's viewer.
-    rotation = Matrix.Rotation(0 if back else math.pi, 4, "Y")
-    obj.matrix_world = frame @ Matrix.Translation(position) @ rotation
-    return obj
+    curve.materials.append(material)
+    probe = bpy.data.objects.new(label["name"], curve)
+    bpy.context.collection.objects.link(probe)
+
+    def measure(line):
+        left, right = line_bounds(curve, probe, line)
+        return right - left
+
+    lines = label["text"].split("\n")
+    if label["wrapped"]:
+        lines = list(wrap_lines(label["text"], box.x, measure))
+        fitting_lines = int((box.y + 1e-5) / size)
+        if len(lines) > fitting_lines:
+            print(f"Advertencia: {label['name']} excede la altura de su caja de SurfaceGui")
+            lines = lines[:fitting_lines]
+
+    free_height = box.y - size * len(lines)
+    y += {"Top": 0, "Center": free_height / 2, "Bottom": free_height}[label["yAlignment"]]
+    # Approximate Gotham's baseline and line metrics with the chosen face at the declared pixel size.
+    y += size * 0.78
+    for index, line in enumerate(lines):
+        if not line:
+            continue
+        left, right = line_bounds(curve, probe, line)
+        free_width = box.x - (right - left)
+        shift = {"Left": 0, "Center": free_width / 2, "Right": free_width}[label["xAlignment"]]
+        obj = bpy.data.objects.new(label["name"], curve.copy())
+        bpy.context.collection.objects.link(obj)
+        obj.matrix_world = frame @ Matrix.Translation((x + shift - left, -y - index * size, 0))
+    bpy.data.objects.remove(probe, do_unlink=True)
+    bpy.data.curves.remove(curve)
+
+
+def render_sign(part, sign, frame, fonts, text_colors):
+    face, width, height = sign_frame(frame, part["size"], sign["face"])
+    canvas = sign.get("canvasSize")
+    if canvas is None:
+        pixels = sign["pixelsPerStud"]
+        canvas = (width * pixels, height * pixels)
+    # Map canvas pixels to the part face; label coordinates start at its upper left.
+    canvas_frame = face @ Matrix.Translation((-width / 2, height / 2, 0))
+    canvas_frame = canvas_frame @ Matrix.Diagonal((width / canvas[0], height / canvas[1], 1, 1))
+    for label in sign["labels"]:
+        rgb = tuple(label["textColor"])
+        if rgb not in text_colors:
+            text_colors[rgb] = text_material(rgb)
+        create_label(label, canvas_frame, canvas, fonts.get(label["font"], fonts["GothamMedium"]), text_colors[rgb])
 
 
 def art_plane(name, frame, size, material):
@@ -185,7 +296,11 @@ def main(args):
     scene.world.node_tree.nodes.get("Background").inputs["Strength"].default_value = 0.12
 
     materials = {}
-    text = surface("Texto ámbar", (0.98, 0.87, 0.67), 1)
+    text_colors = {}
+    fonts = {
+        "GothamMedium": bpy.data.fonts.load(str(args.font)),
+        "GothamBold": bpy.data.fonts.load(str(args.bold_font)),
+    }
     art = {slug: (name, emission_image(path)) for slug, (name, path) in originals.items()}
     roof = []
     for part in data["parts"]:
@@ -195,34 +310,9 @@ def main(args):
         if part["name"] == "Obra":
             name, material = art[part["group"]]
             art_plane(name, frame, part["size"], material)
-        elif part["name"] == "Rotulo del umbral":
-            w, _, depth = part["size"]
-            for sign in part["signs"]:
-                back = sign["face"] == "Back"
-                sign_text("Rótulo", sign["labels"][0]["text"], 0.48 if back else 0.65, frame,
-                          (0, 0, (1 if back else -1) * (depth / 2 + 0.014)), text, back)
-        elif part["name"] == "Directorio de obras":
-            for label in part["signs"][0]["labels"]:
-                y = part["size"][1] * (0.5 - label["y"] - label["h"] / 2)
-                x = -part["size"][0] * (label["x"] + label["w"] / 2 - 0.5)
-                sign_text("Directorio", label["text"], 0.31, frame,
-                          (x, y, -part["size"][2] / 2 - 0.014), text)
-        elif part["name"] == "CedulaIntroductoria":
-            width, height, depth = part["size"]
-            for label in part["signs"][0]["labels"]:
-                size = label["size"] / 100
-                columns = 23 if label["y"] < 0.2 else 33
-                copy = textwrap.fill(label["text"], columns)
-                y = height * (0.5 - label["y"] - label["h"] / 2)
-                sign_text("Cédula de entrada", copy, size, frame,
-                          (0, y, -depth / 2 - 0.014), text)
-        elif part["name"] == "Placa":
-            w, h, depth = part["size"]
-            for label in part["signs"][0]["labels"]:
-                copy = label["text"].replace(" del Valle", "\ndel Valle").replace(" y el abrigo", "\ny el abrigo").replace(" y un mundo", "\ny un mundo")
-                y = h * (0.5 - label["y"] - label["h"] / 2)
-                sign_text("Placa · atribución", copy, 0.22, frame,
-                          (0, y, -depth / 2 - 0.014), text)
+            continue
+        for sign in part["signs"]:
+            render_sign(part, sign, frame, fonts, text_colors)
 
     for z in (3, 15, 29, 43, 58):
         for side in (-1, 1):
@@ -250,6 +340,9 @@ def main(args):
         "encarnacion": ((-4.2, 5.7, 38.8), (-20, 6.2, 38.5), 25),
         "introduccion": ((-11.5, 4.9, 4.7), (-20.3, 4.35, 3.65), 33),
         "cinco-estaciones": ((-7.5, 6.25, 1.9), (6, 6.1, 40), 9.5),
+        "cedula-detalle": ((-14.4, 4.5, 3.9), (-20.3, 4.35, 3.65), 28),
+        "directorio": ((0, 10.6, 4.1), (0, 12.32, 14.85), 25),
+        "placa-encarnacion": ((-15.65, 4.8, 44.3), (-20.1, 4.6, 44.5), 26),
         "retorno": ((9.5, 5.65, 47), (0, 6.3, 0), 24),
     }
     for name, parameters in views.items():

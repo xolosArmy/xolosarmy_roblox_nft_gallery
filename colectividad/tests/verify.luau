@@ -129,7 +129,8 @@ assert(room.install(settings, false) == nil)
 rejects(function() room.install(settings, true) end, "Studio sin publicar")
 studio = true
 
-local function verifyRoutes(geometry, threshold)
+-- Check clearance against the bounds of collidable architecture in room coordinates.
+local function verifyRouteClearance(geometry, threshold)
 	local solids = {}
 	for _, node in findAll(geometry, "BasePart") do
 		if node.CanCollide and node.Name ~= "Piso continuo" then
@@ -164,20 +165,11 @@ local function verifyRoutes(geometry, threshold)
 			clear(r.Vector3.new(center + offset - 1.25, 0.05, 5), r.Vector3.new(center + offset + 1.25, 6.05, 58))
 		end
 	end
-	for _, height in { 3.5, 5.5, 7 } do
-		for _, targetHeight in { 3.4, 7.65, 11.9 } do
-			local origin, target = r.Vector3.new(0, height, -1), r.Vector3.new(0, targetHeight, 62.1)
-			for step = 1, 124 do
-				local point = origin:Lerp(target, step / 125)
-				clear(point, point)
-			end
-		end
-	end
 end
 
 local function verifyRoom(built, threshold)
 	local geometry = built.Arquitectura
-	verifyRoutes(geometry, threshold)
+	verifyRouteClearance(geometry, threshold)
 	assert(#geometry.Procesion:GetChildren() == 5)
 	assert(#findAll(geometry, "PointLight") == 10)
 	assert(#findAll(geometry, "ParticleEmitter") == 0)

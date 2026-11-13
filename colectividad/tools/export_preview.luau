@@ -46,6 +46,14 @@ local function vector(value)
 	return { value.X, value.Y, value.Z }
 end
 
+local function color(value)
+	return { value.R, value.G, value.B }
+end
+
+local function udim2(value)
+	return { value.X.Scale, value.Y.Scale, value.X.Offset, value.Y.Offset }
+end
+
 local elements = {}
 for _, object in ipairs(room:GetDescendants()) do
 	if object:IsA("BasePart") then
@@ -54,7 +62,7 @@ for _, object in ipairs(room:GetDescendants()) do
 			group = object.Parent.Name,
 			size = vector(object.Size),
 			transform = { object.CFrame:GetComponents() },
-			color = { object.Color.R, object.Color.G, object.Color.B },
+			color = color(object.Color),
 			shape = object.Shape.Name,
 			material = object.Material.Name,
 			collidable = object.CanCollide,
@@ -64,16 +72,26 @@ for _, object in ipairs(room:GetDescendants()) do
 			if child:IsA("Attachment") and child:FindFirstChildWhichIsA("ProximityPrompt") then
 				element.prompt = vector(object.CFrame:PointToWorldSpace(child.Position))
 			elseif child:IsA("SurfaceGui") then
-				local sign = { face = child.Face.Name, labels = {} }
+				local sign = { face = child.Face.Name, name = child.Name, labels = {} }
+				if child.SizingMode == roblox.Enum.SurfaceGuiSizingMode.FixedSize then
+					sign.canvasSize = { child.CanvasSize.X, child.CanvasSize.Y }
+				else
+					sign.pixelsPerStud = child.PixelsPerStud
+				end
 				for _, label in ipairs(child:GetChildren()) do
 					if label:IsA("TextLabel") then
 						table.insert(sign.labels, {
+							name = label.Name,
 							text = label.Text,
-							x = label.Position.X.Scale,
-							y = label.Position.Y.Scale,
-							w = label.Size.X.Scale,
-							h = label.Size.Y.Scale,
-							size = label.TextSize,
+							position = udim2(label.Position),
+							boxSize = udim2(label.Size),
+							anchor = { label.AnchorPoint.X, label.AnchorPoint.Y },
+							textSize = label.TextSize,
+							textColor = color(label.TextColor3),
+							font = label.Font.Name,
+							xAlignment = label.TextXAlignment.Name,
+							yAlignment = label.TextYAlignment.Name,
+							wrapped = label.TextWrapped,
 						})
 					end
 				end

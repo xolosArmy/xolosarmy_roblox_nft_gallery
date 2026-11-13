@@ -34,7 +34,7 @@ El montaje de Encarnación sigue el [dictamen de Astra](etapa5.md). El fondo de 
 
 ## Previsualización
 
-Blender usa las posiciones, medidas, colores y rótulos exportados desde Luau. Sus luces y cámaras son de previsualización. Las cinco obras se muestran con sus PNG canónicos verificados. Los marcos de la maqueta Roblox muestran el aviso de asset pendiente.
+Blender usa las posiciones, medidas, colores y rótulos exportados desde Luau. La iluminación, las cámaras y la tipografía de escritorio son aproximaciones para revisar el diseño. Las cinco obras se muestran con sus PNG canónicos verificados. Los marcos de la maqueta Roblox muestran el aviso de asset pendiente.
 
 | Vista | Imagen |
 | --- | --- |
@@ -45,6 +45,7 @@ Blender usa las posiciones, medidas, colores y rótulos exportados desde Luau. S
 | Tonalli en el Xolo | [Terracota, sol y tres cactus](evidencia/tonalli.jpg) |
 | Encarnación de Xolotl | [Marco, Venus y motivo «Memoria»](evidencia/encarnacion.jpg) |
 | Cédula de Xólotl | [Panel de entrada](evidencia/introduccion.jpg) |
+| Revisión de los rótulos | [Antes y después](evidencia/revision-final-antes-despues.jpg) |
 | Volumen y recorridos | [Axonometría sin cubierta](evidencia/axonometria.jpg) |
 | Acceso y circulación | [Entrada](evidencia/entrada.jpg) · [Procesión](evidencia/procesion.jpg) · [Regreso](evidencia/retorno.jpg) |
 
@@ -52,7 +53,7 @@ Las capturas y el video de Studio quedan pendientes de una prueba ejecutada en l
 
 ### Regenerar la previsualización
 
-Desde la raíz del repositorio, con Lune 0.11.1, Blender 4.3 y Python con Pillow. Obtén los PNG en `originales` mediante [el procedimiento de verificación](obra.md).
+Desde la raíz del repositorio, con Lune 0.11.1, Blender 4.3 y Python con Pillow. La previsualización usa Lato Medium y Bold como aproximación de Gotham. Si las fuentes están en otra ubicación, indica sus archivos con `--font` y `--bold-font`. Obtén los PNG en `originales` mediante [el procedimiento de verificación](obra.md).
 
 ```sh
 lune run colectividad/tools/export_preview.luau sala.json

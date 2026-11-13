@@ -5,7 +5,7 @@
 - Compilación de todos los scripts Luau con el compilador oficial 0.746.
 - Pruebas Lune con instancias de rbx-dom y consultas del mundo simuladas. Verifican los cinco marcos cuadrados, su orientación, cinco prompts NFT con los títulos y datos correctos, y el rechazo de un ID inválido en la quinta obra sin dejar una instalación parcial. Confirman el anclaje de prueba, la conservación de instancias históricas simuladas y la reejecución sin duplicados.
 - Prueba del LocalScript con señales simuladas. Al alternar entre obras se actualizan título, edición, token y anuncio. Solo se procesa el prompt del visitante local y de su exhibidor. Se comprueba una GUI y una suscripción por lector, foco exclusivo entre ficha y cédula, cierre con botón o mando y limpieza al reaparecer. Se verifican las propiedades de ajuste de texto, márgenes de pantalla y desplazamiento de la ficha.
-- Comprobación geométrica con cajas alineadas a los ejes locales de las holguras de 0.35 y 0.20 studs, del traslado de las 12 piezas de «Memoria», del alcance entre los seis prompts y del despeje de los dos corredores y del cruce final. El ensayo usa dos envolventes de avatar de 2.5 studs de ancho por corredor y comprueba el eje visual hacia 001 a tres alturas.
+- Comprobación geométrica con cajas alineadas a los ejes locales de las holguras de 0.35 y 0.20 studs, del traslado de las 12 piezas de «Memoria», del alcance entre los seis prompts y del despeje de los dos corredores y del cruce final. El ensayo usa dos envolventes de avatar de 2.5 studs de ancho por corredor. La comprobación de la línea de visión y el comportamiento de cámara se realiza en Studio.
 - Construcción con Rojo 7.7.1 de ambos proyectos y lectura de la maqueta generada para comprobar sus scripts y catálogo. Generación del mapa de fuentes de la integración parcial.
 - Dimensiones y SHA-256 de los cinco PNG verificados. Xolos Explorer ofrece las referencias de token, minteo y anuncio. Se verificaron en el nodo que consulta el explorador los cinco minteos y los cinco anuncios.
 - Cotejo de los montajes 001 a 004, cauce, esculturas y envolvente colisionable contra la exportación de la Etapa 4. Los archivos de las salas históricas coinciden con `main`.
@@ -20,6 +20,8 @@ lune run colectividad/tests/verify.luau Colectividad-demo.rbxlx
 ```
 
 ## Aceptación pendiente en Roblox Studio
+
+El [protocolo de QA en copia privada](qa-studio.md) recoge los pasos, las evidencias y los presupuestos de rendimiento del [dictamen artístico](dictamen-final-astra.md).
 
 Ejecutar primero en la maqueta local y luego en la copia privada que contiene el museo real. La primera verifica el diseño espacial y la segunda verifica la conexión y regresión. [Modos de prueba de Studio](https://create.roblox.com/docs/studio/testing-modes).
 
