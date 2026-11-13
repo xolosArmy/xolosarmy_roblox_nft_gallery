@@ -113,6 +113,56 @@ local function buildEclipse(exhibit, frame)
 	end
 end
 
+local function buildTonalli(exhibit, frame)
+	local clay = Color3.fromRGB(104, 58, 44)
+	local solar = Color3.fromRGB(210, 150, 83)
+	local cactusClay = Color3.fromRGB(172, 111, 81)
+	local petals = Color3.fromRGB(223, 147, 108)
+
+	panelPart(exhibit, "Paño de terracota", frame * CFrame.new(0.35, 0, 0.46),
+		Vector3.new(11.3, 11.6, 0.28), clay)
+
+	local sun = frame * CFrame.new(5.13, 1.5, 0.26)
+	local disc = panelPart(exhibit, "Disco solar", sun * CFrame.Angles(0, math.pi / 2, 0),
+		Vector3.new(0.14, 1.12, 1.12), solar)
+	disc.Shape = Enum.PartType.Cylinder
+	for ray = 0, 7 do
+		panelPart(exhibit, "Rayo solar",
+			sun * CFrame.Angles(0, 0, ray * math.pi / 4) * CFrame.new(0, 0.69, 0),
+			Vector3.new(0.055, 0.15, 0.14), solar)
+	end
+
+	local heights = {0.88, 1.06, 0.96}
+	for index, height in ipairs(heights) do
+		local cactus = Instance.new("Model")
+		cactus.Name = "Cactus florido " .. index
+		cactus.Parent = exhibit
+
+		local base = frame * CFrame.new((2 - index) * 2.7, -5.64, 0.24)
+		panelPart(cactus, "Tallo", base * CFrame.new(0, height / 2, 0),
+			Vector3.new(0.16, height, 0.16), cactusClay)
+		for _, side in ipairs({-1, 1}) do
+			local branchHeight = if side == -1 then 0.27 else 0.38
+			local branch = base * CFrame.new(side * 0.22, height * 0.34, 0)
+			panelPart(cactus, "Brazo", base * CFrame.new(side * 0.11, height * 0.34, 0),
+				Vector3.new(0.24, 0.105, 0.16), cactusClay)
+			panelPart(cactus, "Brote", branch * CFrame.new(0, branchHeight / 2, 0),
+				Vector3.new(0.10, branchHeight, 0.16), cactusClay)
+		end
+
+		local bloom = base * CFrame.new(0, height + 0.12, -0.08)
+		for petal = 0, 4 do
+			local lobe = panelPart(cactus, "Pétalo",
+				bloom * CFrame.Angles(0, 0, petal * 2 * math.pi / 5) * CFrame.new(0, 0.11, 0),
+				Vector3.new(0.12, 0.17, 0.10), petals)
+			lobe.Shape = Enum.PartType.Ball
+		end
+		local center = panelPart(cactus, "Centro de flor", bloom * CFrame.new(0, 0, -0.05),
+			Vector3.new(0.13, 0.13, 0.10), solar)
+		center.Shape = Enum.PartType.Ball
+	end
+end
+
 local slots = {
 	{
 		artworkId = "cauce-del-itzcuintlan",
@@ -144,6 +194,18 @@ local slots = {
 		lightColor = Color3.fromRGB(174, 133, 237),
 		accent = Color3.fromRGB(208, 177, 244),
 		decorate = buildEclipse,
+	},
+	{
+		artworkId = "tonalli-en-el-xolo",
+		artFrame = CFrame.new(20.35, 6.9, 11) * CFrame.Angles(0, math.pi / 2, 0),
+		plaqueFrame = CFrame.new(20.28, 4.6, 16.7) * CFrame.Angles(0, math.pi / 2, 0),
+		artSize = 8,
+		plaqueWidth = 2.6,
+		plaqueTitleSize = 24,
+		promptRange = 6,
+		lightColor = Color3.fromRGB(249, 204, 144),
+		accent = Color3.fromRGB(218, 164, 110),
+		decorate = buildTonalli,
 	},
 }
 

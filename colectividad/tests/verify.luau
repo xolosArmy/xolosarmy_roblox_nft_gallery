@@ -99,8 +99,13 @@ local works = {
 		"0d408720977f09b14ea15bd4c14b94d73cc62d5b2a1463967556b9e04af3b1af",
 		r.Vector3.new(-20.35, 6.9, 23), r.Vector3.xAxis, 8, 7, r.Vector3.new(-20.28, 4.6, 30.15),
 	},
+	["tonalli-en-el-xolo"] = {
+		"Tonalli en el Xolo", "c7a24c96df32e5cab48af66856d2fe07fbef5fc3f40b216a0e5662a918db6ba4",
+		"72a9501b398996778ff280b8f47ce76ee36b694446e417a8425c5936e8ea0daf",
+		r.Vector3.new(20.35, 6.9, 11), -r.Vector3.xAxis, 8, 6, r.Vector3.new(20.28, 4.6, 16.70),
+	},
 }
-assert(#catalog.items == 3)
+assert(#catalog.items == 4)
 for _, item in catalog.items do
 	local expected = assert(works[item.slug])
 	local artwork = artworks[item.slug]
@@ -121,7 +126,7 @@ local function verifyRoom(built, threshold)
 	assert(#geometry.Procesion:GetChildren() == 5)
 	assert(#findAll(geometry, "PointLight") == 10)
 	assert(#findAll(geometry, "ParticleEmitter") == 0)
-	assert(#findAll(built, "BasePart") <= 410)
+	assert(#findAll(built, "BasePart") <= 430)
 	local floor = geometry.Envolvente["Piso continuo"]
 	assert(floor.CanCollide and floor.Size == r.Vector3.new(44, 1, 64))
 	local center = threshold:PointToObjectSpace(floor.CFrame.Position)
@@ -141,12 +146,12 @@ local function verifyRoom(built, threshold)
 		end
 	end
 	local directory = geometry.Envolvente["Directorio de obras"]
-	assert(not directory.CanCollide and directory.Senal.Texto.Text:find("003  Itztlantli", 1, true))
+	assert(not directory.CanCollide and directory.Senal.Texto.Text:find("004  Tonalli", 1, true))
 	assert(threshold:PointToObjectSpace(directory.CFrame.Position).Y - directory.Size.Y / 2 > 10)
 	local exhibits = built.Exhibidores
 	local promptPositions = {}
-	assert(#exhibits:GetChildren() == 3 and #findAll(exhibits, "ProximityPrompt") == 3)
-	assert(#findAll(exhibits, "SurfaceLight") == 3 and #findAll(exhibits, "ParticleEmitter") == 0)
+	assert(#exhibits:GetChildren() == 4 and #findAll(exhibits, "ProximityPrompt") == 4)
+	assert(#findAll(exhibits, "SurfaceLight") == 4 and #findAll(exhibits, "ParticleEmitter") == 0)
 	for slug, expected in works do
 		local exhibit = exhibits[slug]
 		local art = exhibit.Obra
@@ -172,6 +177,7 @@ local function verifyRoom(built, threshold)
 	local sideExhibits = {
 		{ slug = "el-calor-de-huehueteotl", side = 1, z = 30.05 },
 		{ slug = "itztlantli-en-el-nuevo-mundo", side = -1, z = 30.15 },
+		{ slug = "tonalli-en-el-xolo", side = 1, z = 16.70 },
 	}
 	for _, station in sideExhibits do
 		local exhibit = exhibits[station.slug]
@@ -180,7 +186,7 @@ local function verifyRoom(built, threshold)
 			local half = piece.Size / 2
 			local xExtent = math.abs(localFrame.XVector.X) * half.X + math.abs(localFrame.YVector.X) * half.Y
 				+ math.abs(localFrame.ZVector.X) * half.Z
-			-- Both wall assemblies sit behind the reading strips and walking corridors.
+			-- The wall assemblies sit behind the reading strips and walking corridors.
 			assert(localFrame.X * station.side - xExtent > 19.4 and not piece.CanCollide and not piece.CanTouch)
 		end
 		local plaque = exhibit.Placa
@@ -193,6 +199,11 @@ local function verifyRoom(built, threshold)
 	local eclipse = exhibits["itztlantli-en-el-nuevo-mundo"]
 	assert(eclipse["Corona del eclipse"].Shape == r.Enum.PartType.Cylinder)
 	assert(eclipse["Sombra del eclipse"].Shape == r.Enum.PartType.Cylinder)
+	local solar = exhibits["tonalli-en-el-xolo"]
+	assert(solar["Disco solar"].Shape == r.Enum.PartType.Cylinder)
+	for i = 1, 3 do
+		assert(solar:FindFirstChild("Cactus florido " .. i))
+	end
 end
 
 local demo = room.install(settings, true)
@@ -248,7 +259,7 @@ levelFloor = true
 obstructed = true
 rejects(function() room.install(reviewed, false) end, "volumen reservado")
 obstructed = false
-reviewed.ImageIds["itztlantli-en-el-nuevo-mundo"] = "https://example.invalid/imagen.png"
+reviewed.ImageIds["tonalli-en-el-xolo"] = "https://example.invalid/imagen.png"
 rejects(function() room.install(reviewed, false) end, "ID de imagen inválido")
 assert(workspace:FindFirstChild(constants.roomName) == nil)
 reviewed.ImageIds = {}
@@ -352,22 +363,23 @@ local foreign = part(hall, "ProximityPrompt", constants.promptName)
 foreign:SetAttribute(constants.artworkAttribute, calor)
 promptTriggered:emit(foreign, player)
 assert(not gui.Enabled and bindings == 0)
-for _, slug in { cauce, itztlantli, calor, itztlantli, cauce } do
+local tonalli = "tonalli-en-el-xolo"
+for _, slug in { cauce, tonalli, itztlantli, calor, tonalli, cauce } do
 	promptTriggered:emit(prompts[slug], player)
 	local expected = works[slug]
 	assert(gui.Enabled and scroller.Obra.Text == expected[1] and scroller.Edicion.Text:find("1/1", 1, true))
 	assert(scroller.Token.Text == expected[2] and scroller.Anuncio.Text == expected[3])
 	assert(scroller.Explorador.Text == "Xolos Explorer" and bindings == 1)
 end
-prompts[itztlantli]:SetAttribute(constants.artworkAttribute, cauce)
-promptTriggered:emit(prompts[itztlantli], player)
+prompts[tonalli]:SetAttribute(constants.artworkAttribute, cauce)
+promptTriggered:emit(prompts[tonalli], player)
 assert(scroller.Obra.Text == works[cauce][1] and bindings == 1)
 activated:emit()
 assert(not gui.Enabled and bindings == 0)
-promptTriggered:emit(prompts[itztlantli], player)
+promptTriggered:emit(prompts[tonalli], player)
 assert(not gui.Enabled and bindings == 0)
-prompts[itztlantli]:SetAttribute(constants.artworkAttribute, itztlantli)
-promptTriggered:emit(prompts[itztlantli], player)
+prompts[tonalli]:SetAttribute(constants.artworkAttribute, tonalli)
+promptTriggered:emit(prompts[tonalli], player)
 player.CharacterRemoving:emit()
 assert(not gui.Enabled and bindings == 0)
 print("OK: fichas correctas al alternar obras, aislamiento de prompts y una sola GUI y suscripción")

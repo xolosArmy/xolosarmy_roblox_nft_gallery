@@ -1,6 +1,6 @@
 # Colectividad Xoloitzcuintle
 
-Ampliación del Museo del Itzcuintlan para el [mandato XR-ROBLOX-COLECTIVIDAD-SALA-001](https://github.com/xolosArmy/xolosarmy_roblox_nft_gallery/issues/3). La sala se genera en Luau. Incluye una entrada y un regreso físicos, dos recorridos alrededor del cauce, cinco esculturas y tres exhibiciones: «Cauce del Itzcuintlan», «El calor de Huehueteotl» e «Itztlantli en el nuevo mundo».
+Ampliación del Museo del Itzcuintlan para el [mandato XR-ROBLOX-COLECTIVIDAD-SALA-001](https://github.com/xolosArmy/xolosarmy_roblox_nft_gallery/issues/3). La sala se genera en Luau. Incluye una entrada y un regreso físicos, dos recorridos alrededor del cauce, cinco esculturas y cuatro exhibiciones. «Cauce del Itzcuintlan», «El calor de Huehueteotl», «Itztlantli en el nuevo mundo» y «Tonalli en el Xolo».
 
 | Revisión | Archivos |
 | --- | --- |
@@ -17,7 +17,7 @@ Desde la raíz del repositorio, con Rojo 7.7.1:
 rojo build colectividad/demo.project.json -o Colectividad-demo.rbxlx
 ```
 
-Abre el archivo local en Roblox Studio para Windows o macOS. Usa **Play** y entra por el umbral. Activa **Leer ficha** en el muro del fondo y en los dos paños laterales. Vuelve por cualquiera de las dos orillas. El generador construye la sala durante Play. Cada marco muestra «Imagen pendiente de autorización en Roblox» hasta configurar su ID aprobado. La salida de la maqueta vuelve a su propio acceso.
+Abre el archivo local en Roblox Studio para Windows o macOS. Usa **Play** y entra por el umbral. Activa **Leer ficha** en el muro del fondo y en los tres paños laterales. Vuelve por cualquiera de las dos orillas. El generador construye la sala durante Play. Cada marco muestra «Imagen pendiente de autorización en Roblox» hasta configurar su ID aprobado. La salida de la maqueta vuelve a su propio acceso.
 
 ## Probar el museo con la ampliación
 

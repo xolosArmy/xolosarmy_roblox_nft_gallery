@@ -12,5 +12,6 @@ return {
 		["cauce-del-itzcuintlan"] = "",
 		["el-calor-de-huehueteotl"] = "",
 		["itztlantli-en-el-nuevo-mundo"] = "",
+		["tonalli-en-el-xolo"] = "",
 	},
 }

@@ -13,6 +13,10 @@ local interpretation = {
 		plaque = "Dentición del xolo, obsidiana y eclipse",
 		summary = "La obra traza una analogía artística entre la dentición incompleta de algunos xoloitzcuintles sin pelo y los filos de obsidiana del macuahuitl. El eclipse enmarca esa relación en una escenografía ritual imaginada para un mundo nuevo.",
 	},
+	["tonalli-en-el-xolo"] = {
+		plaque = "Barro, sol y tres cactus floridos",
+		summary = "Un xoloitzcuintle de barro suspendido sobre el valle evoca la cerámica de perros de Colima y el paisaje de José María Velasco. El sol ilumina su cuerpo de terracota, que refleja la luz hacia tres cactus floridos. Los cactus representan a su familia humana y el xolo enlaza la tierra, el sol y la familia.",
+	},
 }
 
 local months = {
