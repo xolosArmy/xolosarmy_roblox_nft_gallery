@@ -181,6 +181,9 @@ local function buildReliefs(parent, root)
 	local reliefs = group(parent, "Relieves del valle")
 	for _, side in ipairs({-1, 1}) do
 		for bay, z in ipairs({11, 23, 37, 51}) do
+			if side == 1 and z == 37 then
+				continue -- This wall bay houses El calor de Huehueteotl.
+			end
 			local panel = root * CFrame.new(side * 20.65, 4.4, z)
 			part(reliefs, "Panel de pizarra", Vector3.new(0.32, 7.2, 9.6), panel,
 				stone.obsidian, Enum.Material.Slate)

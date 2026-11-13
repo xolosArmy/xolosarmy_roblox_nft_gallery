@@ -17,7 +17,9 @@ def main():
     parser.add_argument("scene", type=Path)
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
-    elements = json.loads(args.scene.read_text())
+    data = json.loads(args.scene.read_text())
+    elements = data["parts"]
+    artwork_numbers = {item["slug"]: f'{item["number"]:03d}' for item in data["catalog"]}
 
     paper, ink, secondary = "#f1eadd", "#202b2c", "#505854"
     earth, basalt, water = "#dfd0bb", "#303c3b", "#389b88"
@@ -47,19 +49,25 @@ def main():
 
     def number(point, value):
         x, y = point
-        draw.ellipse((x - 12, y - 12, x + 12, y + 12), fill=ink, outline=paper, width=2)
+        if isinstance(value, str):
+            draw.rounded_rectangle((x - 18, y - 11, x + 18, y + 11), radius=5, fill=ink, outline=paper, width=2)
+        else:
+            draw.ellipse((x - 12, y - 12, x + 12, y + 12), fill=ink, outline=paper, width=2)
         draw.text((x, y - 1), str(value), font=font(13, True), fill=paper, anchor="mm")
 
     for name, color in (
         ("Piso continuo", earth), ("Muro lateral", basalt), ("Muro del umbral", basalt),
         ("Muro de la obra", basalt), ("Jamba", basalt), ("Panel de pizarra", "#948473"),
-        ("Orilla", "#7a9a7a"), ("Agua", water), ("Marco", "#a1582e"), ("Obra", "#e49847"),
+        ("Orilla", "#7a9a7a"), ("Agua", water), ("Paño de arcilla", "#a1582e"),
+        ("Marco", "#a1582e"), ("Obra", "#e49847"),
         ("Placa", "#b78957"),
     ):
         for part in elements:
             if part["name"] == name:
                 polygon(part, color)
 
+    reading_area = (xy(14, 42), xy(19.4, 28))
+    draw.rectangle(reading_area, fill="#e7bc90", outline="#af692e", width=2)
     for part in elements:
         if part["name"] == "Torso":
             x, _, z, *_ = part["transform"]
@@ -77,10 +85,17 @@ def main():
             middle = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
             arrow(start, middle if idx == 3 else end, "#8b4528", 4, 13)
 
-    x, y = xy(7.7, 58.5)
-    draw.ellipse((x - 7, y - 7, x + 7, y + 7), fill="#e49847", outline=ink, width=2)
-    draw.text((x + 14, y - 13), "Leer ficha", font=font(16, True), fill=ink)
-    draw.text(xy(0, 61), "OBRA", font=font(14, True), fill=ink, anchor="mt")
+    for part in elements:
+        if part["name"] == "Obra":
+            x, _, z, *_ = part["transform"]
+            number(xy(x - 3 if x > 0 else x, z if x > 0 else z - 2.2), artwork_numbers[part["group"]])
+        if "prompt" in part:
+            px, _, pz = part["prompt"]
+            x, y = xy(px, pz)
+            draw.ellipse((x - 6, y - 6, x + 6, y + 6), fill="#e49847", outline=ink, width=2)
+
+    arrow(xy(10.1, 34.5), xy(15.2, 34.5), "#ae672d", width=3, head=9)
+    draw.text(xy(20, 25.8), "Lectura 002", font=font(15, True), fill=ink, anchor="rt")
 
     # Dimension lines sit outside the walkable plan.
     x1, top = xy(-22, 64)
@@ -98,21 +113,23 @@ def main():
     draw.text((784, 997), "+Z", font=font(16, True), fill=ink, anchor="mt")
 
     draw.line((856, 227, 856, 1115), fill=line, width=2)
-    draw.text((908, 249), "Recorrido", font=font(31, True), fill=ink)
+    draw.text((908, 249), "Recorrido y exhibiciones", font=font(31, True), fill=ink)
     notes = [
         ("Umbral", "Piso a cota 0. Se entra y se regresa\npor la misma abertura."),
         ("Cauce", "Incrustación turquesa sobre piso continuo.\nCinco xolos orientados hacia la obra."),
         ("Orillas", "Dos franjas de paso libre de 6 studs.\nCruce transversal entre Z 49 y 58."),
-        ("Muro principal", "Obra de 9 × 9 studs, placa y punto\nde lectura. Altura libre de sala: 15 studs."),
-        ("Relieves laterales", "Los paños de pizarra admiten obras\nfuturas sin ocupar la circulación."),
+        ("001 · Cauce del Itzcuintlan", "Muro del fondo · obra 9 × 9, frente −Z.\nCentro (0, 7.65, 62.25)."),
+        ("002 · El calor de Huehueteotl", "Paño +X · obra 8 × 8, frente −X.\nCentro (20.35, 6.9, 37).\nLectura: X 14–19.4, Z 28–42."),
     ]
     for index, (heading, copy) in enumerate(notes):
         y = 321 + index * 132
         draw.line((908, y - 12, 1363, y - 12), fill=line, width=1)
         draw.text((909, y), heading, font=font(22, True), fill=amber)
         draw.multiline_text((909, y + 36), copy, font=font(19), fill=ink, spacing=7)
-    draw.text((908, 1030), "Cota y orientación locales respecto al Attachment.", font=font(16), fill=secondary)
-    draw.text((908, 1057), "Implantación en el museo pendiente de inventario.", font=font(16), fill=secondary)
+    draw.ellipse((909, 1012, 921, 1024), fill="#e49847", outline=ink, width=2)
+    draw.text((933, 1007), "Prompt · Leer ficha", font=font(17), fill=ink)
+    draw.text((908, 1055), "Altura libre: 15 studs. Cotas respecto al umbral.", font=font(16), fill=secondary)
+    draw.text((908, 1083), "Implantación en el museo pendiente de inventario.", font=font(16), fill=secondary)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     image.save(args.output, optimize=True)

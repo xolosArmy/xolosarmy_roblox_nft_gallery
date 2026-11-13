@@ -10,5 +10,6 @@ return {
 	-- Art slug -> Roblox Image content ID. Only enter a verified, approved Image from the exact PNG.
 	ImageIds = {
 		["cauce-del-itzcuintlan"] = "",
+		["el-calor-de-huehueteotl"] = "",
 	},
 }

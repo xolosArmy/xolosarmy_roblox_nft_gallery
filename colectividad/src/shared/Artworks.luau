@@ -1,17 +1,38 @@
-local artworks = {
-	["cauce-del-itzcuintlan"] = table.freeze({
-		title = "Cauce del Itzcuintlan",
-		edition = "1/1",
-		date = "13 de noviembre de 2026",
-		credit = "xolosArmy Network · Colectividad Xoloitzcuintle",
+local catalog = require(script.Parent.Catalogo)
+
+local interpretation = {
+	["cauce-del-itzcuintlan"] = {
+		plaque = "Lectura poética del Valle de México y del Itzcuintlan",
 		summary = "Cinco xoloitzcuintles siguen un cauce común. Su instinto de actuar en colectividad se entrelaza con su leyenda en una lectura poética del Valle de México y del Itzcuintlan.",
-		protocol = "SLP NFT1 Child · eCash",
-		collection = "xolosArmy Community",
-		tokenId = "750d49cd41749b550acbe59a8e81e4bcfcec5f74b2b49ae5d29145d17cad2ced",
-		announcementProtocol = "Tonalli Memo TM1",
-		announcementId = "4ae0b1fadced2eb706bfa6845f56a1cb7b99b25843d915facc27125f3ffce06e",
-		explorerName = "Xolos Explorer",
-	}),
+	},
+	["el-calor-de-huehueteotl"] = {
+		plaque = "El petate, el fuego y el abrigo compartido",
+		summary = "Sobre un petate, los xoloitzcuintles se acurrucan en tres niveles y comparten su calor. El brasero de Huehuetéotl evoca un fuego que la comunidad resguarda. La escena propone una lectura contemporánea del abrigo colectivo.",
+	},
 }
+
+local months = {
+	"enero", "febrero", "marzo", "abril", "mayo", "junio",
+	"julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+}
+local artworks = {}
+for _, item in catalog.items do
+	local copy = assert(interpretation[item.slug], "Falta el texto curatorial de " .. item.slug)
+	local year, month, day = item.date:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)$")
+	artworks[item.slug] = table.freeze({
+		title = item.name,
+		edition = item.edition,
+		date = string.format("%d de %s de %s", tonumber(day), months[tonumber(month)], year),
+		credit = "xolosArmy Network · " .. catalog.collection,
+		summary = copy.summary,
+		plaque = copy.plaque,
+		protocol = item.protocol .. " · " .. catalog.network,
+		collection = catalog.nft_collection,
+		tokenId = item.token_id,
+		announcementProtocol = item.announcement.protocol,
+		announcementId = item.announcement.txid,
+		explorerName = "Xolos Explorer",
+	})
+end
 
 return table.freeze(artworks)

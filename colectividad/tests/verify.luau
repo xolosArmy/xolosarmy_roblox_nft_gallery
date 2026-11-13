@@ -3,6 +3,7 @@ local fs = require("@lune/fs")
 local luau = require("@lune/luau")
 local process = require("@lune/process")
 local r = require("@lune/roblox")
+local serde = require("@lune/serde")
 
 local env = table.clone(r)
 local paths = {
@@ -13,7 +14,8 @@ local paths = {
 	Artworks = "shared/Artworks",
 	ExhibitConstants = "shared/ExhibitConstants",
 }
-local shared = { Artworks = "Artworks", ExhibitConstants = "ExhibitConstants" }
+local catalog = serde.decode("json", fs.readFile("colectividad/src/shared/Catalogo.json"))
+local shared = { Artworks = "Artworks", ExhibitConstants = "ExhibitConstants", Catalogo = "Catalogo" }
 local workspace = r.Instance.new("Workspace")
 local studio, obstructed, levelFloor = false, false, true
 local raycasts, boxes = 0, 0
@@ -37,11 +39,11 @@ local services = {
 	Workspace = workspace,
 }
 env.game = { PlaceId = 0, GameId = 0, GetService = function(_, name) return assert(services[name], name) end }
-env.script = { Parent = { Displays = "Displays", Geometry = "Geometry" } }
+env.script = { Parent = { Displays = "Displays", Geometry = "Geometry", Catalogo = "Catalogo" } }
 env.RaycastParams = { new = function() return {} end }
 env.OverlapParams = { new = function() return {} end }
 
-local modules = {}
+local modules = { Catalogo = catalog }
 env.require = function(name)
 	if not modules[name] then
 		local path = "colectividad/src/" .. assert(paths[name]) .. ".luau"
@@ -80,11 +82,31 @@ end
 local room = load("Room")
 local settings = load("Settings")
 local constants = load("ExhibitConstants")
-local artwork = load("Artworks")["cauce-del-itzcuintlan"]
-assert(artwork.edition == "1/1" and artwork.explorerName == "Xolos Explorer")
-assert(artwork.tokenId == "750d49cd41749b550acbe59a8e81e4bcfcec5f74b2b49ae5d29145d17cad2ced")
-assert(artwork.announcementId == "4ae0b1fadced2eb706bfa6845f56a1cb7b99b25843d915facc27125f3ffce06e")
-assert(artwork.collection == "xolosArmy Community")
+local artworks = load("Artworks")
+local works = {
+	["cauce-del-itzcuintlan"] = {
+		"Cauce del Itzcuintlan", "750d49cd41749b550acbe59a8e81e4bcfcec5f74b2b49ae5d29145d17cad2ced",
+		"4ae0b1fadced2eb706bfa6845f56a1cb7b99b25843d915facc27125f3ffce06e",
+		r.Vector3.new(0, 7.65, 62.25), -r.Vector3.zAxis, 9, 9, r.Vector3.new(7.7, 4.6, 62.18),
+	},
+	["el-calor-de-huehueteotl"] = {
+		"El calor de Huehueteotl", "ae430d802b9b2514f721f9305881bbdff03b7c8e3a495e3ad093fdf7b98e3b8f",
+		"bfbd5d6cfb33cff43a71e886fe8ef4ba7068ea21231d5aec91682ad83e34af21",
+		r.Vector3.new(20.35, 6.9, 37), -r.Vector3.xAxis, 8, 7, r.Vector3.new(20.28, 4.6, 30.05),
+	},
+}
+assert(#catalog.items == 2)
+for _, item in catalog.items do
+	local expected = assert(works[item.slug])
+	local artwork = artworks[item.slug]
+	assert(artwork.title == expected[1] and artwork.edition == "1/1")
+	assert(artwork.tokenId == expected[2] and artwork.announcementId == expected[3])
+	assert(artwork.explorerName == "Xolos Explorer" and artwork.collection == "xolosArmy Community")
+	assert(item.explorer_url == "https://explorer.xolosarmy.xyz/token/" .. expected[2])
+	assert(item.mint_tx_url == "https://explorer.xolosarmy.xyz/tx/" .. expected[2])
+	assert(item.announcement.explorer_url == "https://explorer.xolosarmy.xyz/tx/" .. expected[3])
+	assert(settings.ImageIds[item.slug] == "")
+end
 assert(room.install(settings, false) == nil)
 rejects(function() room.install(settings, true) end, "Studio sin publicar")
 studio = true
@@ -94,7 +116,7 @@ local function verifyRoom(built, threshold)
 	assert(#geometry.Procesion:GetChildren() == 5)
 	assert(#findAll(geometry, "PointLight") == 10)
 	assert(#findAll(geometry, "ParticleEmitter") == 0)
-	assert(#findAll(built, "BasePart") <= 340)
+	assert(#findAll(built, "BasePart") <= 380)
 	local floor = geometry.Envolvente["Piso continuo"]
 	assert(floor.CanCollide and floor.Size == r.Vector3.new(44, 1, 64))
 	local center = threshold:PointToObjectSpace(floor.CFrame.Position)
@@ -113,13 +135,47 @@ local function verifyRoom(built, threshold)
 				or position.Z - solid.Size.Z / 2 >= 62.999)
 		end
 	end
-	local prompts = findAll(built, "ProximityPrompt")
-	assert(#prompts == 1 and prompts[1].MaxActivationDistance == 9)
-	assert(prompts[1]:GetAttribute(constants.artworkAttribute) == "cauce-del-itzcuintlan")
-	local art = built.Exhibidores["cauce-del-itzcuintlan"].Obra
-	assert(art.Size.X == art.Size.Y and art.Size.X == 9 and art.Obra.Face == r.Enum.NormalId.Front)
-	assert(art.Obra.Estado.Text:find("autorización", 1, true))
-	assert(art.Obra:FindFirstChild("Imagen") == nil)
+	local exhibits = built.Exhibidores
+	local promptPositions = {}
+	local combinedPromptRange = 0
+	assert(#exhibits:GetChildren() == 2 and #findAll(exhibits, "ProximityPrompt") == 2)
+	assert(#findAll(exhibits, "SurfaceLight") == 2 and #findAll(exhibits, "ParticleEmitter") == 0)
+	for slug, expected in works do
+		local exhibit = exhibits[slug]
+		local art = exhibit.Obra
+		local plaque = exhibit.Placa
+		local prompt = plaque.PuntoDeLectura[constants.promptName]
+		assert(plaque.Ficha.Titulo.Text == expected[1] and plaque.Ficha.Edicion.Text:find("1/1", 1, true))
+		assert(prompt.ObjectText == expected[1] and prompt.MaxActivationDistance == expected[7] and prompt.RequiresLineOfSight)
+		assert(prompt:GetAttribute(constants.artworkAttribute) == slug)
+		table.insert(promptPositions, plaque.CFrame:PointToWorldSpace(prompt.Parent.Position))
+		combinedPromptRange += prompt.MaxActivationDistance
+		assert(art.Size.X == art.Size.Y and art.Size.X == expected[6] and art.Obra.Face == r.Enum.NormalId.Front)
+		assert((threshold:PointToObjectSpace(art.CFrame.Position) - expected[4]).Magnitude < 0.001)
+		assert(near(threshold:VectorToObjectSpace(art.CFrame.LookVector):Dot(expected[5]), 1))
+		assert((threshold:PointToObjectSpace(plaque.CFrame.Position) - expected[8]).Magnitude < 0.001)
+		assert(near(threshold:VectorToObjectSpace(plaque.CFrame.LookVector):Dot(expected[5]), 1))
+		assert(art.Obra.Estado.Text:find("autorización", 1, true))
+		assert(art.Obra:FindFirstChild("Imagen") == nil)
+	end
+
+	assert((promptPositions[1] - promptPositions[2]).Magnitude > combinedPromptRange)
+
+	local hearth = exhibits["el-calor-de-huehueteotl"]
+	assert(hearth:FindFirstChild("Petate") and hearth:FindFirstChild("Fuego simbólico"))
+	for _, piece in findAll(hearth, "BasePart") do
+		local localFrame = threshold:ToObjectSpace(piece.CFrame)
+		local half = piece.Size / 2
+		local xExtent = math.abs(localFrame.XVector.X) * half.X + math.abs(localFrame.YVector.X) * half.Y
+			+ math.abs(localFrame.ZVector.X) * half.Z
+		-- Keep the full +X path (X 7–13) and its adjacent reading area clear of mounted parts.
+		assert(localFrame.X - xExtent > 19.4 and not piece.CanCollide and not piece.CanTouch)
+	end
+	local plaque = hearth.Placa
+	local promptOrigin = plaque.CFrame:PointToWorldSpace(plaque.PuntoDeLectura.Position)
+	local reader = threshold:PointToWorldSpace(r.Vector3.new(15, 4, 30.05))
+	assert((reader - promptOrigin).Magnitude < plaque.PuntoDeLectura[constants.promptName].MaxActivationDistance)
+
 end
 
 local demo = room.install(settings, true)
@@ -175,7 +231,7 @@ levelFloor = true
 obstructed = true
 rejects(function() room.install(reviewed, false) end, "volumen reservado")
 obstructed = false
-reviewed.ImageIds["cauce-del-itzcuintlan"] = "https://example.invalid/imagen.png"
+reviewed.ImageIds["el-calor-de-huehueteotl"] = "https://example.invalid/imagen.png"
 rejects(function() room.install(reviewed, false) end, "ID de imagen inválido")
 assert(workspace:FindFirstChild(constants.roomName) == nil)
 reviewed.ImageIds = {}
@@ -189,11 +245,122 @@ assert(built:FindFirstChild("AccesoDePrueba") == nil)
 assert(priorRaycasts == 19 and priorBoxes == 5, `{priorRaycasts} rayos, {priorBoxes} cajas`)
 print("OK: datos canónicos, puerta de prueba, anclaje, geometría, colisiones declaradas, aislamiento, reversión y reejecución")
 
+local function signal()
+	local callbacks = {}
+	return {
+		Connect = function(_, callback)
+			callbacks[callback] = true
+			return { Disconnect = function() callbacks[callback] = nil end }
+		end,
+		emit = function(_, ...)
+			for callback in callbacks do
+				callback(...)
+			end
+		end,
+		count = function()
+			local count = 0
+			for _ in callbacks do count += 1 end
+			return count
+		end,
+	}
+end
+
+-- Run the actual LocalScript with synthetic Roblox signals.
+local activated = signal()
+r.implementMethod("Instance", "WaitForChild", function(node, name)
+	return assert(node:FindFirstChild(name), name)
+end)
+r.implementProperty("GuiButton", "Activated", function() return activated end)
+r.implementProperty("Instance", "Destroying", signal)
+local playerGui = r.Instance.new("PlayerGui")
+local player = {
+	CharacterRemoving = signal(),
+	WaitForChild = function(_, name)
+		assert(name == "PlayerGui")
+		return playerGui
+	end,
+}
+local promptTriggered = signal()
+local clientShared = {
+	WaitForChild = function(_, name) return assert(shared[name], name) end,
+	GetAttribute = function(_, name) return name == constants.readyAttribute end,
+}
+local bindings = 0
+local clientServices = {
+	Players = { LocalPlayer = player },
+	ProximityPromptService = { PromptTriggered = promptTriggered },
+	ReplicatedStorage = {
+		WaitForChild = function(_, name)
+			assert(name == "ColectividadXoloitzcuintle")
+			return clientShared
+		end,
+	},
+	Workspace = workspace,
+	GuiService = {},
+	UserInputService = { GetLastInputType = function() return r.Enum.UserInputType.Touch end },
+	ContextActionService = {
+		BindAction = function() bindings += 1 end,
+		UnbindAction = function() bindings -= 1 end,
+	},
+	CollectionService = {
+		GetTagged = function() return {} end,
+		GetInstanceAddedSignal = signal,
+		GetInstanceRemovedSignal = signal,
+	},
+}
+local clientEnv = table.clone(r)
+clientEnv.game = { GetService = function(_, name) return assert(clientServices[name], name) end }
+clientEnv.require = load
+local clientPath = "colectividad/src/client/Exhibit.client.luau"
+local function runClient()
+	luau.load(fs.readFile(clientPath), { debugName = clientPath, environment = clientEnv })()
+end
+runClient()
+runClient()
+assert(#playerGui:GetChildren() == 1 and promptTriggered:count() == 1 and activated:count() == 1)
+local gui = playerGui[constants.guiName]
+local scroller = gui.Ficha.Contenido
+assert(gui.ScreenInsets == r.Enum.ScreenInsets.CoreUISafeInsets)
+assert(scroller.AutomaticCanvasSize == r.Enum.AutomaticSize.Y and scroller.Token.TextWrapped and scroller.Anuncio.TextWrapped)
+local prompts = {}
+for slug in works do
+	prompts[slug] = built.Exhibidores[slug].Placa.PuntoDeLectura[constants.promptName]
+end
+local cauce = "cauce-del-itzcuintlan"
+local calor = "el-calor-de-huehueteotl"
+promptTriggered:emit(prompts[calor], {})
+assert(not gui.Enabled and bindings == 0)
+local foreign = part(hall, "ProximityPrompt", constants.promptName)
+foreign:SetAttribute(constants.artworkAttribute, calor)
+promptTriggered:emit(foreign, player)
+assert(not gui.Enabled and bindings == 0)
+for _, slug in { cauce, calor, cauce } do
+	promptTriggered:emit(prompts[slug], player)
+	local expected = works[slug]
+	assert(gui.Enabled and scroller.Obra.Text == expected[1] and scroller.Edicion.Text:find("1/1", 1, true))
+	assert(scroller.Token.Text == expected[2] and scroller.Anuncio.Text == expected[3])
+	assert(scroller.Explorador.Text == "Xolos Explorer" and bindings == 1)
+end
+prompts[calor]:SetAttribute(constants.artworkAttribute, cauce)
+promptTriggered:emit(prompts[calor], player)
+assert(scroller.Obra.Text == works[cauce][1] and bindings == 1)
+activated:emit()
+assert(not gui.Enabled and bindings == 0)
+promptTriggered:emit(prompts[calor], player)
+assert(not gui.Enabled and bindings == 0)
+prompts[calor]:SetAttribute(constants.artworkAttribute, calor)
+promptTriggered:emit(prompts[calor], player)
+player.CharacterRemoving:emit()
+assert(not gui.Enabled and bindings == 0)
+print("OK: fichas correctas al alternar obras, aislamiento de prompts y una sola GUI y suscripción")
+
 if process.args[1] then
 	local demoPlace = r.deserializePlace(fs.readFile(process.args[1]))
 	local bootstrap = demoPlace.ServerScriptService.ColectividadXoloitzcuintle.Bootstrap
 	assert(bootstrap:IsA("Script") and bootstrap:GetAttribute("Demo") == true)
-	assert(demoPlace.ReplicatedStorage.ColectividadXoloitzcuintle.Artworks:IsA("ModuleScript"))
+	local sharedPackage = demoPlace.ReplicatedStorage.ColectividadXoloitzcuintle
+	assert(sharedPackage.Artworks:IsA("ModuleScript"))
+	assert(sharedPackage.Catalogo:IsA("ModuleScript") and sharedPackage.Catalogo.Source:find(works["el-calor-de-huehueteotl"][2], 1, true))
 	assert(demoPlace.StarterPlayer.StarterPlayerScripts.ColectividadXoloitzcuintle.Exhibit:IsA("LocalScript"))
 	print("OK: artefacto Rojo y atributo de maqueta")
 end

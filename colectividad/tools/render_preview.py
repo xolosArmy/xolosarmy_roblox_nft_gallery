@@ -1,4 +1,4 @@
-"""Render the Luau-generated room in Blender, using the verified PNG for the offline mockup."""
+"""Render the Luau-generated room in Blender, using the verified PNGs for the offline mockup."""
 import argparse
 import hashlib
 import json
@@ -13,9 +13,9 @@ from mathutils import Matrix, Vector
 def arguments():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("scene", type=Path)
-    parser.add_argument("original", type=Path)
+    parser.add_argument("originals", type=Path, help="Directory with the original PNGs, named by slug")
     parser.add_argument("output", type=Path)
-    parser.add_argument("--views", nargs="+", default=["entrada", "procesion", "obra", "retorno", "axonometria"])
+    parser.add_argument("--views", nargs="+", default=["entrada", "procesion", "obra", "huehueteotl", "ambas", "retorno", "axonometria"])
     return parser.parse_args(sys.argv[sys.argv.index("--") + 1 :])
 
 
@@ -116,7 +116,7 @@ def sign_text(name, body, size, frame, position, color, back=False):
     return obj
 
 
-def art_plane(frame, size, material):
+def art_plane(name, frame, size, material):
     w, h, depth = size
     mesh = bpy.data.meshes.new("Obra 1:1")
     # The -Z face is viewed with local +X to the left.
@@ -129,7 +129,7 @@ def art_plane(frame, size, material):
     uv = mesh.uv_layers.new()
     for index, pair in enumerate(((0, 0), (1, 0), (1, 1), (0, 1))):
         uv.data[index].uv = pair
-    plane = bpy.data.objects.new("Cauce del Itzcuintlan · PNG canónico", mesh)
+    plane = bpy.data.objects.new(name, mesh)
     bpy.context.collection.objects.link(plane)
     plane.matrix_world = frame
     plane.data.materials.append(material)
@@ -158,8 +158,13 @@ def view(scene, camera, output, location, focus, lens, width=1200, height=720):
 
 
 def main(args):
-    expected = "c11d1d6ec30f0e5e6a4ce18575083dfd7233a40f42db4fa48b4449eb7117ccba"
-    assert hashlib.sha256(args.original.read_bytes()).hexdigest() == expected, "PNG canónico incorrecto"
+    data = json.loads(args.scene.read_text())
+    originals = {}
+    for item in data["catalog"]:
+        path = args.originals / f'{item["slug"]}.png'
+        if hashlib.sha256(path.read_bytes()).hexdigest() != item["original_image_sha256"]:
+            raise ValueError(f"El PNG canónico de {item['name']} no coincide con el SHA-256")
+        originals[item["slug"]] = (item["name"], path)
     args.output.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -175,14 +180,15 @@ def main(args):
 
     materials = {}
     text = surface("Texto ámbar", (0.98, 0.87, 0.67), 1)
-    art = emission_image(args.original)
+    art = {slug: (name, emission_image(path)) for slug, (name, path) in originals.items()}
     roof = []
-    for part in json.loads(args.scene.read_text()):
+    for part in data["parts"]:
         obj, frame = create_part(part, materials)
         if part["name"] in {"Cubierta", "Viga transversal", "Luz de recorrido"}:
             roof.append(obj)
         if part["name"] == "Obra":
-            art_plane(frame, part["size"], art)
+            name, material = art[part["group"]]
+            art_plane(name, frame, part["size"], material)
         elif part["name"] == "Rotulo del umbral":
             w, _, depth = part["size"]
             for sign in part["signs"]:
@@ -192,7 +198,7 @@ def main(args):
         elif part["name"] == "Placa":
             w, h, depth = part["size"]
             for label in part["signs"][0]["labels"]:
-                copy = label["text"].replace(" del Valle", "\ndel Valle")
+                copy = label["text"].replace(" del Valle", "\ndel Valle").replace(" y el abrigo", "\ny el abrigo")
                 y = h * (0.5 - label["y"] - label["h"] / 2)
                 sign_text("Placa · atribución", copy, 0.22, frame,
                           (0, y, -depth / 2 - 0.014), text)
@@ -201,6 +207,7 @@ def main(args):
         for side in (-1, 1):
             area("Luz local cálida", (side * 10.5, 13.75, z), (side * 6, 0, z), 1100, 5.5, (1, 0.74, 0.48))
     area("Luz del marco", (0, 12.3, 60.5), (0, 5, 62), 460, 4.4, (1, 0.87, 0.70))
+    area("Luz del petate", (18.1, 10.7, 36.5), (20, 2.4, 36.5), 530, 4, (1, 0.61, 0.30))
     area("Luz rasante del cauce", (0, 11.6, 29), (0, 0, 31), 780, 12, (0.62, 0.86, 0.89))
     area("Luz del acceso", (0, 9, -5), (0, 7, 1), 540, 7, (1, 0.8, 0.63))
 
@@ -212,6 +219,8 @@ def main(args):
         "entrada": ((0, 5.4, -14), (0, 9.1, 20), 26),
         "procesion": ((-10, 6.1, 8), (0, 3.4, 29), 23),
         "obra": ((1.25, 5.65, 44), (2, 7.3, 62), 29),
+        "huehueteotl": ((3.5, 5.5, 32.2), (20, 6.5, 36.6), 27),
+        "ambas": ((-13, 6.6, 25), (10, 5.9, 46.5), 21),
         "retorno": ((9.5, 5.65, 47), (0, 6.3, 0), 24),
     }
     for name, parameters in views.items():
@@ -223,7 +232,7 @@ def main(args):
         area("Luz general de maqueta", (0, 54, 20), (0, 0, 30), 16000, 48, (0.90, 0.95, 1))
         camera.data.type = "ORTHO"
         camera.data.ortho_scale = 95
-        view(scene, camera, args.output / "axonometria.png", (58, 109, -31), (0, 5, 32), 40, 1200, 880)
+        view(scene, camera, args.output / "axonometria.png", (-58, 109, -31), (0, 7, 32), 40, 1200, 880)
 
 
 if __name__ == "__main__":

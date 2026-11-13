@@ -172,8 +172,10 @@ local connections = {
 		if triggeringPlayer ~= player or prompt.Name ~= constants.promptName or not belongsToExhibit(prompt) then
 			return
 		end
-		local artwork = artworks[prompt:GetAttribute(constants.artworkAttribute)]
-		if artwork then
+		local artworkId = prompt:GetAttribute(constants.artworkAttribute)
+		local exhibit = prompt:FindFirstAncestorWhichIsA("Model")
+		local artwork = artworks[artworkId]
+		if artwork and exhibit and exhibit.Name == artworkId then
 			show(artwork)
 		end
 	end),

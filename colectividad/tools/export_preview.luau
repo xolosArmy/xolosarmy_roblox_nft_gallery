@@ -17,6 +17,8 @@ end
 local room = roblox.Instance.new("Model")
 room.Name = "Colectividad"
 loadModule("server/Geometry.luau").build(room, roblox.CFrame.identity)
+local catalog = serde.decode("json", fs.readFile("colectividad/src/shared/Catalogo.json"))
+environment.script = { Parent = { Catalogo = "shared/Catalogo.json" } }
 local displayEnvironment = table.clone(environment)
 displayEnvironment.game = {
 	GetService = function()
@@ -28,9 +30,15 @@ displayEnvironment.game = {
 		}
 	end,
 }
-displayEnvironment.require = loadModule
+local function requireModule(path)
+	if path == "shared/Catalogo.json" then
+		return catalog
+	end
+	return loadModule(path)
+end
+environment.require = requireModule
+displayEnvironment.require = requireModule
 loadModule("server/Displays.luau", displayEnvironment).build(room, roblox.CFrame.identity, {})
-
 
 local function vector(value)
 	return { value.X, value.Y, value.Z }
@@ -51,7 +59,9 @@ for _, object in ipairs(room:GetDescendants()) do
 			signs = {},
 		}
 		for _, child in ipairs(object:GetChildren()) do
-			if child:IsA("SurfaceGui") then
+			if child:IsA("Attachment") and child:FindFirstChildWhichIsA("ProximityPrompt") then
+				element.prompt = vector(object.CFrame:PointToWorldSpace(child.Position))
+			elseif child:IsA("SurfaceGui") then
 				local sign = { face = child.Face.Name, labels = {} }
 				for _, label in ipairs(child:GetChildren()) do
 					if label:IsA("TextLabel") then
@@ -71,5 +81,5 @@ for _, object in ipairs(room:GetDescendants()) do
 	end
 end
 
-fs.writeFile(outputPath, serde.encode("json", elements))
+fs.writeFile(outputPath, serde.encode("json", { parts = elements, catalog = catalog.items }))
 print(`{#elements} piezas exportadas desde Geometry.luau y Displays.luau`)

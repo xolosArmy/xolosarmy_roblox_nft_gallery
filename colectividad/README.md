@@ -1,12 +1,12 @@
 # Colectividad Xoloitzcuintle
 
-Ampliación del Museo del Itzcuintlan para el [mandato XR-ROBLOX-COLECTIVIDAD-SALA-001](https://github.com/xolosArmy/xolosarmy_roblox_nft_gallery/issues/3). La sala se genera en Luau. Incluye una entrada y un regreso físicos, dos recorridos alrededor del cauce, cinco esculturas y la ficha de «Cauce del Itzcuintlan».
+Ampliación del Museo del Itzcuintlan para el [mandato XR-ROBLOX-COLECTIVIDAD-SALA-001](https://github.com/xolosArmy/xolosarmy_roblox_nft_gallery/issues/3). La sala se genera en Luau. Incluye una entrada y un regreso físicos, dos recorridos alrededor del cauce, cinco esculturas y dos exhibiciones, «Cauce del Itzcuintlan» y «El calor de Huehueteotl».
 
 | Revisión | Archivos |
 | --- | --- |
 | Diseño, planta y previsualizaciones | [Arquitectura](docs/arquitectura.md) |
 | Inventario, anclaje, respaldo y reversión | [Integración](docs/integracion.md) |
-| PNG exacto, permisos del asset y referencias criptográficas | [Obra inaugural](docs/obra.md) |
+| PNG originales, permisos de assets y referencias criptográficas | [Obras](docs/obra.md) |
 | Pruebas automatizadas y recorrido de aceptación | [Validación](docs/validacion.md) |
 
 ## Abrir la maqueta local
@@ -17,7 +17,7 @@ Desde la raíz del repositorio, con Rojo 7.7.1:
 rojo build colectividad/demo.project.json -o Colectividad-demo.rbxlx
 ```
 
-Abre el archivo local en Roblox Studio para Windows o macOS. Usa **Play** y entra por el umbral. Acércate a la placa, activa **Leer ficha** y vuelve por cualquiera de las dos orillas. El generador construye la sala durante Play. El marco muestra «Imagen pendiente de autorización en Roblox» hasta configurar un ID de imagen aprobado. La salida de la maqueta vuelve a su propio acceso.
+Abre el archivo local en Roblox Studio para Windows o macOS. Usa **Play** y entra por el umbral. Activa **Leer ficha** en el muro del fondo y en el paño lateral de Huehueteotl. Vuelve por cualquiera de las dos orillas. El generador construye la sala durante Play. Cada marco muestra «Imagen pendiente de autorización en Roblox» hasta configurar su ID aprobado. La salida de la maqueta vuelve a su propio acceso.
 
 ## Probar el museo con la ampliación
 
